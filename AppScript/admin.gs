@@ -15,17 +15,17 @@ function getAllUsers(params) {
 }
 
 function rechargeCredits(body) {
-  if (!body.user_id || !body.amount) {
+  if (!body.user_id || body.amount == null) {
     return response({
       success: false,
       message: "user_id and amount are required",
     });
   }
 
-  if (body.amount <= 0) {
+  if (typeof body.amount !== "number" || body.amount <= 0) {
     return response({
       success: false,
-      message: "Amount must be greater than 0",
+      message: "Amount must be a number greater than 0",
     });
   }
 
@@ -71,15 +71,13 @@ function adminUpdateCustomer(body) {
 
   for (let i = 1; i < data.length; i++) {
     if (data[i][userIdIndex] === body.user_id) {
-      const rowNumber = i + 1;
+      const rowData = [...data[i]];
 
-      if (body.new_password)
-        sheet
-          .getRange(rowNumber, passwordIndex + 1)
-          .setValue(body.new_password);
-      if (body.name)
-        sheet.getRange(rowNumber, nameIndex + 1).setValue(body.name);
+      // Use !== undefined so callers can explicitly pass "" to clear a field
+      if (body.new_password !== undefined) rowData[passwordIndex] = body.new_password;
+      if (body.name !== undefined) rowData[nameIndex] = body.name;
 
+      sheet.getRange(i + 1, 1, 1, rowData.length).setValues([rowData]);
       return response({ success: true, message: "Customer updated" });
     }
   }
@@ -102,19 +100,15 @@ function getDashboard(params) {
   const qtyDeliveredIndex = headers.indexOf("quantity_delivered");
   const isSkippedIndex = headers.indexOf("is_skipped");
 
-  const baseDate = new Date(params.date);
-  const dates = {
-    yesterday: new Date(baseDate),
-    today: new Date(baseDate),
-    tomorrow: new Date(baseDate),
-  };
-  dates.yesterday.setDate(baseDate.getDate() - 1);
-  dates.tomorrow.setDate(baseDate.getDate() + 1);
+  // params.date is the "today" anchor. Shift by ±1 using local date arithmetic
+  // (no UTC conversion) so IST users always get the correct calendar dates.
+  const todayStr    = params.date;
+  const yesterdayStr = shiftDate(params.date, -1);
+  const tomorrowStr  = shiftDate(params.date, 1);
 
-  function buildSummary(targetDate) {
-    const dateStr = targetDate.toISOString().split("T")[0];
+  function buildSummary(targetDateStr) {
     const summary = {
-      date: dateStr,
+      date: targetDateStr,
       lunch: {
         total_ordered: 0,
         total_delivered: 0,
@@ -136,14 +130,10 @@ function getDashboard(params) {
     };
 
     for (let i = 1; i < data.length; i++) {
-      // Safe date conversion
-      const rawDate = data[i][dateIndex];
-      const orderDate =
-        rawDate instanceof Date
-          ? rawDate.toISOString().split("T")[0]
-          : String(rawDate).split("T")[0];
-
-      if (orderDate !== dateStr) continue;
+      // toISTDateStr converts sheet Date objects to IST YYYY-MM-DD strings,
+      // fixing the UTC-midnight off-by-one day that previously occurred.
+      const orderDateStr = toISTDateStr(data[i][dateIndex]);
+      if (orderDateStr !== targetDateStr) continue;
 
       const slot = data[i][slotIndex];
       const type = data[i][typeIndex];
@@ -175,9 +165,9 @@ function getDashboard(params) {
 
   return response({
     success: true,
-    yesterday: buildSummary(dates.yesterday),
-    today: buildSummary(dates.today),
-    tomorrow: buildSummary(dates.tomorrow),
+    yesterday: buildSummary(yesterdayStr),
+    today:     buildSummary(todayStr),
+    tomorrow:  buildSummary(tomorrowStr),
   });
 }
 
@@ -192,12 +182,7 @@ function markDayComplete(body) {
   const completedDateIndex = completedHeaders.indexOf("date");
 
   for (let i = 1; i < completedData.length; i++) {
-    const rawDate = completedData[i][completedDateIndex];
-    const completedDate =
-      rawDate instanceof Date
-        ? rawDate.toISOString().split("T")[0]
-        : String(rawDate).split("T")[0];
-
+    const completedDate = toISTDateStr(completedData[i][completedDateIndex]);
     if (completedDate === body.date) {
       return response({ success: false, message: "Day already reconciled" });
     }
@@ -214,12 +199,7 @@ function markDayComplete(body) {
   // Build user_id -> total credits map for that day
   const creditMap = {};
   for (let i = 1; i < ordersData.length; i++) {
-    const rawDate = ordersData[i][dateIndex];
-    const orderDate =
-      rawDate instanceof Date
-        ? rawDate.toISOString().split("T")[0]
-        : String(rawDate).split("T")[0];
-
+    const orderDate = toISTDateStr(ordersData[i][dateIndex]);
     if (orderDate !== body.date) continue;
     if (ordersData[i][isSkippedIndex] === true) continue;
 
@@ -251,7 +231,7 @@ function markDayComplete(body) {
 
   // Record completion
   const completedSheet = getSheet(SHEETS.completed_days);
-  const completionId = "COMP" + String(completedData.length).padStart(3, "0");
+  const completionId = Utilities.getUuid();
   const now = new Date().toISOString();
 
   completedSheet.appendRow([
@@ -301,17 +281,17 @@ function getNegativeCredits(params) {
 // ─────────────────────────────────────────────
 
 function reduceCreditsAgainstOrder(body) {
-  if (!body.order_id || !body.credits_to_add) {
+  if (!body.order_id || body.credits_to_add == null) {
     return response({
       success: false,
       message: "order_id and credits_to_add are required",
     });
   }
 
-  if (body.credits_to_add <= 0) {
+  if (typeof body.credits_to_add !== "number" || body.credits_to_add <= 0) {
     return response({
       success: false,
-      message: "credits_to_add must be greater than 0",
+      message: "credits_to_add must be a number greater than 0",
     });
   }
 
@@ -336,11 +316,7 @@ function reduceCreditsAgainstOrder(body) {
       orderUserId = ordersData[i][userIdIndex];
       currentCredits = ordersData[i][creditsIndex] || 0;
 
-      const rawDate = ordersData[i][dateIndex];
-      orderDate =
-        rawDate instanceof Date
-          ? rawDate.toISOString().split("T")[0]
-          : String(rawDate).split("T")[0];
+      orderDate = toISTDateStr(ordersData[i][dateIndex]);
       break;
     }
   }
@@ -351,29 +327,16 @@ function reduceCreditsAgainstOrder(body) {
 
   // Update credits_used on order
   const newCredits = currentCredits + body.credits_to_add;
-  orderSheet.getRange(orderRow, creditsIndex + 1).setValue(newCredits);
+  const orderRowData = [...ordersData[orderRow - 1]];
+  orderRowData[creditsIndex] = newCredits;
+  orderSheet.getRange(orderRow, 1, 1, orderRowData.length).setValues([orderRowData]);
 
-  // Check if day is already completed
-  const completedData = getSheetData(SHEETS.completed_days);
-  const completedHeaders = completedData[0];
-  const completedDateIndex = completedHeaders.indexOf("date");
-
-  let isDayCompleted = false;
-  for (let i = 1; i < completedData.length; i++) {
-    const rawDate = completedData[i][completedDateIndex];
-    const completedDate =
-      rawDate instanceof Date
-        ? rawDate.toISOString().split("T")[0]
-        : String(rawDate).split("T")[0];
-
-    if (completedDate === orderDate) {
-      isDayCompleted = true;
-      break;
-    }
-  }
+  // Check if day is already completed — use a distinct name to avoid
+  // shadowing the global isDayCompleted() helper from config.gs
+  const dayAlreadyClosed = isDayCompleted(orderDate);
 
   // If day already completed, deduct immediately from user balance
-  if (isDayCompleted) {
+  if (dayAlreadyClosed) {
     const customerSheet = getSheet(SHEETS.customers);
     const customerData = getSheetData(SHEETS.customers);
     const customerHeaders = customerData[0];
@@ -383,10 +346,9 @@ function reduceCreditsAgainstOrder(body) {
     for (let i = 1; i < customerData.length; i++) {
       if (customerData[i][customerUserIdIndex] === orderUserId) {
         const currentBalance = customerData[i][creditBalanceIndex] || 0;
-        const newBalance = currentBalance - body.credits_to_add;
-        customerSheet
-          .getRange(i + 1, creditBalanceIndex + 1)
-          .setValue(newBalance);
+        const custRowData = [...customerData[i]];
+        custRowData[creditBalanceIndex] = currentBalance - body.credits_to_add;
+        customerSheet.getRange(i + 1, 1, 1, custRowData.length).setValues([custRowData]);
         break;
       }
     }
@@ -394,13 +356,13 @@ function reduceCreditsAgainstOrder(body) {
 
   return response({
     success: true,
-    message: isDayCompleted
+    message: dayAlreadyClosed
       ? "Credits added to order and deducted from user balance immediately"
       : "Credits added to order, will be deducted at day completion",
     order_id: body.order_id,
     previous_credits: currentCredits,
     new_credits: newCredits,
-    day_completed: isDayCompleted,
+    day_completed: dayAlreadyClosed,
   });
 }
 
@@ -412,6 +374,10 @@ function getMonthlyReport(params) {
       success: false,
       message: "start_date and end_date are required",
     });
+  }
+
+  if (new Date(params.start_date) > new Date(params.end_date)) {
+    return response({ success: false, message: "start_date cannot be after end_date" });
   }
 
   if (!params.user_id) {
@@ -431,8 +397,10 @@ function getMonthlyReport(params) {
   const isSkippedIndex = headers.indexOf("is_skipped");
   const orderIdIndex = headers.indexOf("order_id");
 
-  const startDate = new Date(params.start_date);
-  const endDate = new Date(params.end_date);
+  // Use string comparison (YYYY-MM-DD is lexicographically sortable) to avoid
+  // the UTC-vs-IST off-by-one bug. Comparison is inclusive on both ends.
+  const startDateStr = params.start_date;
+  const endDateStr = params.end_date;
 
   // Summary counters
   let totalOrdered = 0;
@@ -445,13 +413,8 @@ function getMonthlyReport(params) {
   for (let i = 1; i < data.length; i++) {
     if (data[i][userIdIndex] !== params.user_id) continue;
 
-    const rawDate = data[i][dateIndex];
-    const orderDate =
-      rawDate instanceof Date
-        ? new Date(rawDate.toISOString().split("T")[0])
-        : new Date(String(rawDate).split("T")[0]);
-
-    if (orderDate < startDate || orderDate > endDate) continue;
+    const orderDateStr = toISTDateStr(data[i][dateIndex]);
+    if (orderDateStr < startDateStr || orderDateStr > endDateStr) continue;
 
     const qtyOrdered = data[i][qtyOrderedIndex] || 0;
     const qtyDelivered = data[i][qtyDeliveredIndex] || 0;
@@ -470,7 +433,7 @@ function getMonthlyReport(params) {
 
     orders.push({
       order_id: data[i][orderIdIndex],
-      date: orderDate.toISOString().split("T")[0],
+      date: orderDateStr,
       slot: data[i][slotIndex],
       quantity_ordered: qtyOrdered,
       quantity_delivered: qtyDelivered,

@@ -2,6 +2,14 @@ function createCustomer(body) {
   const sheet = getSheet(SHEETS.customers);
   const data = getSheetData(SHEETS.customers);
 
+  if (!body.name || !body.password) {
+    return response({ success: false, message: "name and password are required" });
+  }
+
+  if (!body.mobile || !/^\d{10}$/.test(String(body.mobile))) {
+    return response({ success: false, message: "Mobile number must be exactly 10 digits" });
+  }
+
   // Check duplicate mobile
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][2]) === String(body.mobile)) {
@@ -9,8 +17,8 @@ function createCustomer(body) {
     }
   }
 
-  // Generate user_id
-  const userId = "USR" + String(data.length).padStart(3, "0");
+  // Generate user_id — UUID guarantees uniqueness, no sheet read needed
+  const userId = Utilities.getUuid();
   const now = new Date().toISOString().split("T")[0];
 
   sheet.appendRow([
@@ -72,19 +80,16 @@ function updateCustomer(body) {
 
   for (let i = 1; i < data.length; i++) {
     if (data[i][userIdIndex] === body.user_id) {
-      const rowNumber = i + 1;
+      const rowData = [...data[i]];
 
-      if (body.name)
-        sheet.getRange(rowNumber, nameIndex + 1).setValue(body.name);
-      if (body.password)
-        sheet.getRange(rowNumber, passwordIndex + 1).setValue(body.password);
-      if (body.address_1)
-        sheet.getRange(rowNumber, address1Index + 1).setValue(body.address_1);
-      if (body.address_2)
-        sheet.getRange(rowNumber, address2Index + 1).setValue(body.address_2);
-      if (body.address_3)
-        sheet.getRange(rowNumber, address3Index + 1).setValue(body.address_3);
+      // Use !== undefined so callers can explicitly pass "" to clear a field
+      if (body.name !== undefined) rowData[nameIndex] = body.name;
+      if (body.password !== undefined) rowData[passwordIndex] = body.password;
+      if (body.address_1 !== undefined) rowData[address1Index] = body.address_1;
+      if (body.address_2 !== undefined) rowData[address2Index] = body.address_2;
+      if (body.address_3 !== undefined) rowData[address3Index] = body.address_3;
 
+      sheet.getRange(i + 1, 1, 1, rowData.length).setValues([rowData]);
       return response({ success: true, message: "Customer updated" });
     }
   }
