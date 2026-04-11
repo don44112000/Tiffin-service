@@ -11,7 +11,7 @@ interface UseCacheResult<T> {
 
 export function useCache<T>(
   key: string,
-  fetcher: () => Promise<T>,
+  fetcher: (isRefresh: boolean) => Promise<T>,
   ttlMs = 5 * 60 * 1000
 ): UseCacheResult<T> {
   const cached = readCache<T>(key);
@@ -25,7 +25,7 @@ export function useCache<T>(
     else setIsLoading(true);
     setError(null);
     try {
-      const fresh = await fetcher();
+      const fresh = await fetcher(isRefresh);
       setData(fresh);
       writeCache(key, fresh);
     } catch (err) {

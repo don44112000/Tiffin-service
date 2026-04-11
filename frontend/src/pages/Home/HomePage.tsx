@@ -20,8 +20,8 @@ export default function HomePage() {
   const tomorrow = tomorrowStr();
 
   const fetcher = useCallback(
-    () => getOrdersByUser(user!.user_id, today, tomorrow).then((r) => r.orders),
-    [user?.user_id, today, tomorrow]
+    (isRefresh: boolean) => getOrdersByUser(user!.user_id, today, tomorrow, isRefresh).then((r) => r.orders),
+    [user, today, tomorrow]
   );
 
   const { data: orders, isLoading, isRefreshing, refresh } = useCache<Order[]>(

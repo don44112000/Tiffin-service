@@ -1,18 +1,56 @@
-.skeleton {}
-.textGroup { display: flex; flex-direction: column; gap: 6px; }
-.card { padding: 0; }
-.gap { margin-bottom: 16px; }
-.gap8 { margin-bottom: 8px; }
+/* Common Skeleton Layout */
+.skeleton {
+  background: var(--color-skeleton);
+  background-image: linear-gradient(
+    90deg,
+    var(--color-skeleton) 0%,
+    var(--color-skeleton-shimmer) 40%,
+    var(--color-skeleton) 80%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.015);
+}
 
-.homeSkeleton,
-.calSkeleton,
-.reportSkeleton,
-.profileSkeleton {
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--color-bg);
+}
+
+.header {
+  height: 68px; /* Fixed height to match sticky header */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 12px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pageContent {
+  flex: 1;
   padding: 16px;
   display: flex;
   flex-direction: column;
 }
 
+/* Utilities */
+.textGroup { display: flex; flex-direction: column; gap: 6px; }
+.card { padding: 0; }
+.gap { margin-bottom: 16px; }
+.gap8 { margin-bottom: 8px; }
+
+/* Route Specifics */
 .calGrid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -24,4 +62,18 @@
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-bottom: 16px;
+}
+
+/* Reset individual paddings from previous version */
+.homeSkeleton,
+.calSkeleton,
+.reportSkeleton,
+.profileSkeleton {
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

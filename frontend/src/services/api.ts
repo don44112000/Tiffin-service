@@ -13,37 +13,50 @@ import type {
 const BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 const SECRET = import.meta.env.VITE_API_SECRET as string;
 
-// ── Generic helpers ────────────────────────────────────────────────────────
+import { requestQueue } from './queueManager';
 
-async function apiGet<T>(action: string, params: Record<string, string> = {}): Promise<T> {
-  const query = new URLSearchParams({ action, secret: SECRET, ...params });
-  const url = `${BASE_URL}?${query.toString()}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  if (!data.success) throw new Error(data.message || 'Unknown error');
-  return data as T;
+async function apiGet<T>(
+  action: string, 
+  params: Record<string, string> = {}, 
+  options?: { silent?: boolean }
+): Promise<T> {
+  return requestQueue.add(async () => {
+    const query = new URLSearchParams({ action, secret: SECRET, ...params });
+    const url = `${BASE_URL}?${query.toString()}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Unknown error');
+    return data as T;
+  }, options);
 }
 
-async function apiPost<T>(action: string, body: Record<string, unknown> = {}): Promise<T> {
-  const res = await fetch(BASE_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action, secret: SECRET, ...body }),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  if (!data.success) throw new Error(data.message || 'Unknown error');
-  return data as T;
+async function apiPost<T>(
+  action: string, 
+  body: Record<string, unknown> = {}, 
+  options?: { silent?: boolean }
+): Promise<T> {
+  return requestQueue.add(async () => {
+    const res = await fetch(BASE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, secret: SECRET, ...body }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Unknown error');
+    return data as T;
+  }, options);
 }
 
 // ── Auth / Customer ────────────────────────────────────────────────────────
 
 export async function loginCustomer(
   mobile: string,
-  password: string
+  password: string,
+  silent = false
 ): Promise<{ customer: Customer }> {
-  return apiGet('get_customer', { mobile, password });
+  return apiGet('get_customer', { mobile, password }, { silent });
 }
 
 export async function createCustomer(
@@ -88,9 +101,14 @@ function normalizeOrderDate<T extends { date?: string }>(o: T): T {
 export async function getOrdersByUser(
   user_id: string,
   start_date: string,
-  end_date: string
+  end_date: string,
+  silent = false
 ): Promise<{ orders: Order[]; total: number }> {
-  const res = await apiGet<{ orders: Order[]; total: number }>('get_orders_by_user', { user_id, start_date, end_date });
+  const res = await apiGet<{ orders: Order[]; total: number }>(
+    'get_orders_by_user', 
+    { user_id, start_date, end_date }, 
+    { silent }
+  );
   if (res.orders) res.orders = res.orders.map(normalizeOrderDate);
   return res;
 }
@@ -98,9 +116,14 @@ export async function getOrdersByUser(
 export async function getMonthlyReport(
   user_id: string,
   start_date: string,
-  end_date: string
+  end_date: string,
+  silent = false
 ): Promise<MonthlyReport> {
-  const res = await apiGet<MonthlyReport>('get_monthly_report', { user_id, start_date, end_date });
+  const res = await apiGet<MonthlyReport>(
+    'get_monthly_report', 
+    { user_id, start_date, end_date }, 
+    { silent }
+  );
   if (res.orders) res.orders = res.orders.map(normalizeOrderDate);
   return res;
 }

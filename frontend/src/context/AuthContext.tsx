@@ -43,10 +43,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = useCallback(async () => {
     if (!user) return;
     try {
-      const res = await loginCustomer(user.mobile, user.password);
-      setUser(res.customer);
-    } catch {
-      // Keep stale user data
+      const data = await loginCustomer(user.mobile, user.password, true);
+      const updatedUser = { ...data.customer, password: user.password };
+      setUser(updatedUser);
+    } catch (err) {
+      console.error('Failed to refresh user:', err);
     }
   }, [user, setUser]);
 

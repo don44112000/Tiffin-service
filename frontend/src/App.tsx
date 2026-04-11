@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import ToastContainer from './components/Toast/Toast';
 import BottomNav from './components/BottomNav/BottomNav';
+import { LoadingProvider } from './context/LoadingContext';
+import GlobalLoader from './components/Loader/GlobalLoader';
 
 import LoginPage from './pages/Login/LoginPage';
 import RegisterPage from './pages/Register/RegisterPage';
@@ -26,6 +28,7 @@ function AppLayout() {
 
   return (
     <>
+      <GlobalLoader />
       <ToastContainer />
       <Routes>
         {/* Public */}
@@ -66,9 +69,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <ToastProvider>
-          <AppLayout />
-        </ToastProvider>
+        <LoadingProvider>
+          <ToastProvider>
+            <AppLayout />
+          </ToastProvider>
+        </LoadingProvider>
       </AuthProvider>
     </BrowserRouter>
   );

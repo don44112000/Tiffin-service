@@ -22,8 +22,8 @@ export default function MyOrdersPage() {
   const cacheKey = CACHE_KEYS.ORDERS(year, month);
 
   const fetcher = useCallback(
-    () => getOrdersByUser(user!.user_id, monthStartStr(year, month), monthEndStr(year, month)).then(r => r.orders),
-    [user?.user_id, year, month]
+    (isRefresh: boolean) => getOrdersByUser(user!.user_id, monthStartStr(year, month), monthEndStr(year, month), isRefresh).then(r => r.orders),
+    [user, year, month]
   );
 
   const { data: orders, isLoading, isRefreshing, refresh } = useCache<Order[]>(cacheKey, fetcher);
@@ -76,7 +76,7 @@ export default function MyOrdersPage() {
           ) : (
             <div className={styles.orderList}>
               {/* Sort lunch first */}
-              {[...selectedOrders].sort((a, _b) => a.slot === 'lunch' ? -1 : 1).map((o) => (
+              {[...selectedOrders].sort((a) => a.slot === 'lunch' ? -1 : 1).map((o) => (
                 <OrderCard key={o.order_id} order={o} onRefresh={refresh} />
               ))}
             </div>
