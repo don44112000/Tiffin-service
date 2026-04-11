@@ -27,7 +27,12 @@ class RequestQueue {
   async add<T>(task: Task<T>, options?: { silent?: boolean }): Promise<T> {
     const silent = options?.silent ?? false;
     return new Promise((resolve, reject) => {
-      this.queue.push({ task: task as Task<unknown>, resolve, reject, silent });
+      this.queue.push({ 
+        task: task as Task<unknown>, 
+        resolve: resolve as (val: unknown) => void, 
+        reject: reject as (err: unknown) => void, 
+        silent 
+      });
       this.notify();
       this.process();
     });
