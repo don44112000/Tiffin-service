@@ -1,0 +1,15 @@
+{
+  "name": "Local Tiffin Service",
+  "short_name": "Local Tiffin",
+  "description": "Manage your tiffin orders and meal plan",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F4F5",
+  "theme_color": "#FF5200",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["food", "lifestyle"]
+}

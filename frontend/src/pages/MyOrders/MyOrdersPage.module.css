@@ -1,0 +1,33 @@
+.page { display: flex; flex-direction: column; min-height: 100dvh; }
+
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky; top: 0; z-index: 10;
+}
+
+.pageTitle { font-size: var(--font-size-xl); font-weight: var(--font-weight-extrabold); }
+
+.calendarWrap { padding: 12px 12px 0; }
+
+.dayDetail { padding: 16px; }
+
+.dayHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.dayTitle { font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
+.orderCount { font-size: var(--font-size-sm); color: var(--color-text-secondary);
+  background: var(--color-primary-10); color: var(--color-primary);
+  padding: 3px 10px; border-radius: var(--radius-full); font-weight: var(--font-weight-semibold); }
+
+.orderList { display: flex; flex-direction: column; gap: 10px; }
+
+.emptyDay {
+  text-align: center; color: var(--color-text-secondary); font-size: var(--font-size-base);
+  padding: 24px; background: var(--color-surface); border-radius: var(--radius-lg);
+  border: 1.5px dashed var(--color-border);
+}

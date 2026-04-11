@@ -1,0 +1,33 @@
+.indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.md { width: 18px; height: 18px; }
+.sm { width: 14px; height: 14px; }
+
+.veg {
+  border-color: var(--color-veg);
+}
+.veg .dot {
+  background: var(--color-veg);
+}
+
+.nonveg {
+  border-color: var(--color-nonveg);
+}
+.nonveg .dot {
+  background: var(--color-nonveg);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.sm .dot { width: 6px; height: 6px; }

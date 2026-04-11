@@ -1,0 +1,27 @@
+.skeleton {}
+.textGroup { display: flex; flex-direction: column; gap: 6px; }
+.card { padding: 0; }
+.gap { margin-bottom: 16px; }
+.gap8 { margin-bottom: 8px; }
+
+.homeSkeleton,
+.calSkeleton,
+.reportSkeleton,
+.profileSkeleton {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
