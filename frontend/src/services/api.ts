@@ -10,8 +10,7 @@ import type {
   MonthlyReport,
 } from '../types';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
-const SECRET = import.meta.env.VITE_API_SECRET as string;
+const BASE_URL = '/api/proxy';
 
 import { requestQueue } from './queueManager';
 
@@ -21,7 +20,7 @@ async function apiGet<T>(
   options?: { silent?: boolean }
 ): Promise<T> {
   return requestQueue.add(async () => {
-    const query = new URLSearchParams({ action, secret: SECRET, ...params });
+    const query = new URLSearchParams({ action, ...params });
     const url = `${BASE_URL}?${query.toString()}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -39,8 +38,8 @@ async function apiPost<T>(
   return requestQueue.add(async () => {
     const res = await fetch(BASE_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, secret: SECRET, ...body }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, ...body }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
