@@ -132,7 +132,7 @@ export default function ProfilePage() {
         {/* Business Guidelines */}
         {import.meta.env.VITE_BUSINESS_RULES && (
           <div className={styles.rulesSection}>
-            <h4 className={styles.rulesTitle}>Business Guidelines / Rules</h4>
+            <h4 className={styles.rulesTitle}>Service Policies & Guidelines</h4>
             <div className={styles.rulesBox}>
               {import.meta.env.VITE_BUSINESS_RULES.split('|').map((rule: string, idx: number) => (
                 <p key={idx} className={styles.ruleItem}>

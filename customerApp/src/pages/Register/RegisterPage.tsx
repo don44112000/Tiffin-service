@@ -8,6 +8,7 @@ import { loginCustomer } from '../../services/api';
 import { ROUTES } from '../../utils/constants';
 import { todayStr, addDays } from '../../utils/dates';
 import DatePickerInput from '../../components/DatePickerInput/DatePickerInput';
+import ActionProcessingLoader from '../../components/Loader/ActionProcessingLoader';
 import styles from './RegisterPage.module.css';
 
 type Plan = 'lunch' | 'dinner' | 'both';
@@ -74,6 +75,7 @@ export default function RegisterPage() {
 
   return (
     <div className={styles.page}>
+      <ActionProcessingLoader isOpen={isLoading} message={step === 3 ? "Welcome to the family! Setting everything up..." : undefined} />
       {/* Header */}
       <div className={styles.header}>
         <button

@@ -16,8 +16,9 @@ export default function GlobalLoader() {
   const { isLoading } = useLoading();
   const { user } = useAuth();
   const location = useLocation();
+  const isLoginPage = location.pathname === ROUTES.LOGIN || location.pathname === ROUTES.REGISTER;
 
-  if (!isLoading) return null;
+  if (!isLoading || isLoginPage) return null;
 
   const renderSkeleton = () => {
     switch (location.pathname) {

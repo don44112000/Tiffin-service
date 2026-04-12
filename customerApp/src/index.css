@@ -164,7 +164,7 @@ img {
 .page-content {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: calc(var(--nav-height) + 16px);
+  padding-bottom: calc(var(--nav-height) + 24px + env(safe-area-inset-bottom));
   -webkit-overflow-scrolling: touch;
 }
 

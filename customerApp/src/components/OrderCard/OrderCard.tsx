@@ -7,7 +7,8 @@ import StepperInput from '../StepperInput/StepperInput';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { skipOrder, updateOrder } from '../../services/api';
-import { formatTime, todayStr } from '../../utils/dates';
+import { formatTime } from '../../utils/dates';
+import { checkCutoff } from '../../utils/business';
 import styles from './OrderCard.module.css';
 
 interface Props {
@@ -21,15 +22,7 @@ function getStatusInfo(order: Order) {
   return { label: 'Pending', cls: 'warning', dot: '🟡' };
 }
 
-function formatAMPM(date: Date) {
-  let hours = date.getHours();
-  const minutes = date.getMinutes();
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours || 12; // 0 becomes 12
-  const minStr = minutes < 10 ? '0' + minutes : minutes;
-  return `${hours}:${minStr} ${ampm}`;
-}
+
 
 function getAddressLabel(address: string, user: { address_1: string; address_2: string; address_3: string }) {
   if (address === user.address_1) return user.address_1 ? `📍 ${user.address_1}` : '';
@@ -61,34 +54,7 @@ export default function OrderCard({ order, onRefresh }: Props) {
   const canAct = !order.is_delivered && !order.is_skipped;
   const status = getStatusInfo(order);
 
-  const checkCutoff = () => {
-    const today = todayStr();
-    if (order.date < today) {
-      return { blocked: true, reason: 'This order is in the past and cannot be modified.' };
-    }
-    if (order.date > today) return { blocked: false };
-
-    // Today's order, check cutoff
-    const envTime = order.slot === 'lunch' 
-      ? import.meta.env.VITE_LUNCH_CUTOFF_TIME 
-      : import.meta.env.VITE_DINNER_CUTOFF_TIME;
-      
-    if (!envTime) return { blocked: false };
-
-    const [hrs, mins] = envTime.split(':').map(Number);
-    const now = new Date();
-    const cutoff = new Date();
-    cutoff.setHours(hrs, mins, 0, 0);
-
-    if (now > cutoff) {
-      const slotName = order.slot === 'lunch' ? 'Lunch' : 'Dinner';
-      const formattedCutoff = formatAMPM(cutoff);
-      return { blocked: true, reason: `The cutoff time for today's ${slotName} (${formattedCutoff}) has already passed.` };
-    }
-    return { blocked: false };
-  };
-
-  const cutoffInfo = checkCutoff();
+  const cutoffInfo = checkCutoff(order.date, order.slot);
 
   const handleIntent = (action: 'skip' | 'edit') => {
     if (cutoffInfo.blocked) {

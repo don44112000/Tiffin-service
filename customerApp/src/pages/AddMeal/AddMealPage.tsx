@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { addOrderSlot } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 import { todayStr } from '../../utils/dates';
+import { checkCutoff } from '../../utils/business';
 import { ROUTES } from '../../utils/constants';
 import VegIndicator from '../../components/VegIndicator/VegIndicator';
 import StepperInput from '../../components/StepperInput/StepperInput';
@@ -24,6 +25,8 @@ export default function AddMealPage() {
 
   const savedAddresses = [user?.address_1, user?.address_2, user?.address_3].filter(Boolean) as string[];
   const [selectedAddress, setSelectedAddress] = useState(savedAddresses[0] ?? '');
+
+  const cutoffInfo = checkCutoff(date, slot);
 
   const handleSubmit = async () => {
     if (!selectedAddress) { showToast('Please select an address', 'error'); return; }
@@ -115,13 +118,22 @@ export default function AddMealPage() {
           </div>
         )}
 
+        {/* Cutoff Warning */}
+        {cutoffInfo.blocked && (
+          <div className={styles.cutoffWarning}>
+            <p className={styles.warningText}>
+              <strong>⚠️ Action Blocked:</strong> {cutoffInfo.reason}
+            </p>
+          </div>
+        )}
+
         {/* Quantity */}
         <div className="input-group">
           <label className="input-label">Quantity</label>
           <StepperInput value={qty} onChange={setQty} min={1} max={10} />
         </div>
 
-        <button className="btn btn-primary" onClick={handleSubmit} disabled={isLoading}>
+        <button className="btn btn-primary" onClick={handleSubmit} disabled={isLoading || cutoffInfo.blocked}>
           {isLoading ? 'Adding meal…' : '🍱 Add Meal'}
         </button>
       </div>

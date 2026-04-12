@@ -8,6 +8,7 @@ import { todayStr, addDays } from '../../utils/dates';
 import { ROUTES } from '../../utils/constants';
 import StepperInput from '../../components/StepperInput/StepperInput';
 import DatePickerInput from '../../components/DatePickerInput/DatePickerInput';
+import ActionProcessingLoader from '../../components/Loader/ActionProcessingLoader';
 import styles from './ExtendPlanPage.module.css';
 
 type Plan = 'lunch' | 'dinner' | 'both';
@@ -47,6 +48,7 @@ export default function ExtendPlanPage() {
 
   return (
     <div className={styles.page}>
+      <ActionProcessingLoader isOpen={isLoading} />
       <div className={styles.header}>
         <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label="Back">
           <ChevronLeft size={22} />

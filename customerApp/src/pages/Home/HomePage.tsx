@@ -8,6 +8,7 @@ import { todayStr, tomorrowStr, getDayLabel } from '../../utils/dates';
 import { ROUTES } from '../../utils/constants';
 import OrderCard from '../../components/OrderCard/OrderCard';
 import RefreshButton from '../../components/RefreshButton/RefreshButton';
+import PullToRefresh from '../../components/PullToRefresh/PullToRefresh';
 import { HomePageSkeleton } from '../../components/Skeleton/Skeleton';
 import type { Order } from '../../types';
 import styles from './HomePage.module.css';
@@ -61,8 +62,9 @@ export default function HomePage() {
         </div>
         <RefreshButton onRefresh={handleRefresh} isRefreshing={isRefreshing} />
       </div>
-
-      <div className="page-content">
+      
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="page-content">
         {/* Credit Card */}
         <div className={styles.creditCard}>
           <div className={styles.creditLeft}>
@@ -74,9 +76,6 @@ export default function HomePage() {
             </div>
           </div>
           <div className={styles.creditRight}>
-            <div className={styles.creditBar}>
-              <div className={styles.creditBarFill} style={{ width: `${Math.min(100, (creditBalance / 60) * 100)}%` }} />
-            </div>
             <p className={styles.creditNote}>1 credit = 1 meal</p>
           </div>
         </div>
@@ -150,6 +149,7 @@ export default function HomePage() {
           <ChevronRight size={20} className={styles.reportChevron} />
         </Link>
       </div>
+      </PullToRefresh>
     </div>
   );
 }

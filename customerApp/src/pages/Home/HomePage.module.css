@@ -36,10 +36,9 @@
 .creditValue { font-size: var(--font-size-2xl); font-weight: var(--font-weight-extrabold); line-height: 1; }
 .creditSub { font-size: var(--font-size-xs); opacity: 0.75; }
 
-.creditRight { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; min-width: 80px; }
-.creditBar { width: 80px; height: 6px; background: rgba(255,255,255,0.3); border-radius: var(--radius-full); overflow: hidden; }
-.creditBarFill { height: 100%; background: white; border-radius: var(--radius-full); transition: width 0.8s ease; }
+.creditRight { display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; }
 .creditNote { font-size: var(--font-size-xs); opacity: 0.75; white-space: nowrap; }
+
 
 /* Quick actions */
 .quickActions { display: flex; gap: 10px; padding: 0 16px 4px; }

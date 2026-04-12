@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 import styles from './BottomSheet.module.css';
@@ -22,7 +23,7 @@ export default function BottomSheet({ isOpen, onClose, title, children }: Props)
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className={styles.overlay} onClick={onClose}>
       <div
         ref={sheetRef}
@@ -40,6 +41,8 @@ export default function BottomSheet({ isOpen, onClose, title, children }: Props)
         )}
         <div className={styles.content}>{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
+
