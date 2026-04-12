@@ -1,0 +1,134 @@
+.page {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  padding-bottom: calc(var(--nav-height) + 20px);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--color-surface);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  padding: 8px;
+  margin: -8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.pageTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 16px;
+}
+
+.summaryCard {
+  background-color: var(--color-surface);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sumLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sumValue {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
+
+.credit { color: var(--color-success) !important; }
+.debit { color: var(--color-error) !important; }
+
+.historyList {
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historyItem {
+  background-color: var(--color-surface);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.itemLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.itemReason {
+  font-weight: 500;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+
+.itemDate {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.itemRight {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itemAmount {
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+}
+
+.itemType {
+  font-size: var(--font-size-xs);
+  text-transform: capitalize;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  gap: 12px;
+}
+
+.emptyIcon {
+  opacity: 0.2;
+}

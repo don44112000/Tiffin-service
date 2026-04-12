@@ -14,6 +14,7 @@ import styles from './OrderCard.module.css';
 interface Props {
   order: Order;
   onRefresh: () => void;
+  description?: string;
 }
 
 function getStatusInfo(order: Order) {
@@ -31,7 +32,7 @@ function getAddressLabel(address: string, user: { address_1: string; address_2: 
   return `📍 ${address}`;
 }
 
-export default function OrderCard({ order, onRefresh }: Props) {
+export default function OrderCard({ order, onRefresh, description }: Props) {
   const { showToast } = useToast();
   const { user } = useAuth();
   const [skipOpen, setSkipOpen] = useState(false);
@@ -132,6 +133,10 @@ export default function OrderCard({ order, onRefresh }: Props) {
             <span className={styles.qty}>· Qty: {order.quantity_ordered}</span>
           </div>
 
+          {description && (
+            <p className={styles.dishDesc}>{description}</p>
+          )}
+
           <div className={styles.infoRow}>
             <MapPin size={13} className={styles.infoIcon} />
             <span className={styles.address}>
@@ -139,19 +144,23 @@ export default function OrderCard({ order, onRefresh }: Props) {
             </span>
           </div>
 
-          {order.is_delivered && order.delivered_at && (
-            <div className={styles.infoRow}>
-              <Clock size={13} className={styles.infoIcon} />
-              <span className={styles.deliveredAt}>Delivered at {formatTime(order.delivered_at)}</span>
-            </div>
-          )}
-
-          {order.is_delivered && (
-            <div className={styles.infoRow}>
-              <Zap size={13} className={styles.infoIcon} />
-              <span className={styles.credits}>{order.credits_used} credit{order.credits_used !== 1 ? 's' : ''} used</span>
-            </div>
-          )}
+          <div className={styles.infoRow} style={{ marginTop: 'auto', paddingTop: '8px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {order.is_delivered && order.delivered_at ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Clock size={13} className={styles.infoIcon} />
+                <span className={styles.deliveredAt}>{formatTime(order.delivered_at)}</span>
+              </div>
+            ) : (
+              <div></div>
+            )}
+            
+            {order.credits_used > 0 && (
+              <div className={styles.orderCredits}>
+                <Zap size={13} className={styles.zapIcon} />
+                <span>-{order.credits_used} credit{order.credits_used !== 1 ? 's' : ''}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Actions */}

@@ -77,9 +77,32 @@
   text-overflow: ellipsis;
 }
 
-.deliveredAt, .credits {
+.deliveredAt, .qty { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+
+.dishDesc {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.deliveredAt, .credits { font-size: var(--font-size-xs); color: var(--color-text-secondary); font-weight: var(--font-weight-medium); }
+
+.orderCredits {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 59, 59, 0.08);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  color: var(--color-error);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  border: 1px solid rgba(255, 59, 59, 0.15);
+}
+
+.zapIcon {
+  color: var(--color-error);
 }
 
 .actions {

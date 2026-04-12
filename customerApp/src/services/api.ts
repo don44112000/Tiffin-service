@@ -8,6 +8,8 @@ import type {
   ExtendPlanPayload,
   Order,
   MonthlyReport,
+  CreditHistoryResponse,
+  GetMenuResponse,
 } from '../types';
 
 const BASE_URL = '/api/proxy';
@@ -155,4 +157,32 @@ export async function extendPlan(
   orders_created: number;
 }> {
   return apiPost('extend_plan', payload as unknown as Record<string, unknown>);
+}
+
+// ── Credit History ────────────────────────────────────────────────────────
+
+export async function getCreditHistory(
+  user_id: string,
+  start_date: string,
+  end_date: string,
+  silent = false
+): Promise<CreditHistoryResponse> {
+  return apiGet<CreditHistoryResponse>(
+    'get_credit_history',
+    { user_id, start_date, end_date },
+    { silent }
+  );
+}
+
+// ── Menu ──────────────────────────────────────────────────────────────────
+
+export async function getMenu(
+  day?: string,
+  slot?: string,
+  silent = false
+): Promise<GetMenuResponse> {
+  const params: Record<string, string> = {};
+  if (day) params.day = day;
+  if (slot) params.slot = slot;
+  return apiGet<GetMenuResponse>('get_menu', params, { silent });
 }

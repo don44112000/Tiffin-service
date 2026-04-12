@@ -67,3 +67,7 @@ export function addDays(dateStr: string, days: number): string {
 export function getDaysInRange(_start: string, days: number): number {
   return days;
 }
+
+export function getDayOfWeek(date?: Date): string {
+  return format(date || new Date(), 'eeee').toLowerCase();
+}

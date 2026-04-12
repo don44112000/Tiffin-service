@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { readCache, writeCache, isCacheStale } from '../utils/cache';
+import { readCache, writeCache } from '../utils/cache';
 
 interface UseCacheResult<T> {
   data: T | null;
@@ -34,16 +34,19 @@ export function useCache<T>(
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [key, fetcher]); // fetcher might be stable but key definitely changes
 
   useEffect(() => {
-    if (!cached) {
+    // Synchronize state with cache immediately when key changes
+    const freshCached = readCache<T>(key);
+    setData(freshCached);
+    setIsLoading(!freshCached);
+
+    if (!freshCached) {
       fetchData(false);
-    } else if (isCacheStale(key, ttlMs)) {
-      // Have stale data — show it immediately, fetch in background
-      fetchData(true);
     }
-  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Removed automatic background refresh for stale data to honor "show unless refresh" requirement
+  }, [key, ttlMs, fetchData]);
 
   const refresh = useCallback(() => fetchData(true), [fetchData]);
 

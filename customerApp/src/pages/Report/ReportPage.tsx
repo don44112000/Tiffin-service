@@ -1,14 +1,15 @@
 import { useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, TrendingUp, Package, SkipForward, Coins } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { getMonthlyReport } from '../../services/api';
+import { getMonthlyReport, getMenu } from '../../services/api';
 import { useCache } from '../../hooks/useCache';
-import { monthStartStr, monthEndStr, getMonthLabel, formatShortDate } from '../../utils/dates';
+import { monthStartStr, monthEndStr, getMonthLabel, formatShortDate, getDayOfWeek } from '../../utils/dates';
 import { CACHE_KEYS } from '../../utils/constants';
 import RefreshButton from '../../components/RefreshButton/RefreshButton';
 import BottomSheet from '../../components/BottomSheet/BottomSheet';
 import { ReportSkeleton } from '../../components/Skeleton/Skeleton';
-import type { MonthlyReport, MonthlyReportOrder } from '../../types';
+import type { MonthlyReport, MonthlyReportOrder, MenuItem } from '../../types';
+import Footer from '../../components/Footer/Footer';
 import styles from './ReportPage.module.css';
 
 function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: number; color: string }) {
@@ -30,24 +31,47 @@ export default function ReportPage() {
 
   const cacheKey = CACHE_KEYS.REPORT(year, month);
 
-  const fetcher = useCallback(
+  const fetchReport = useCallback(
     () => getMonthlyReport(user!.user_id, monthStartStr(year, month), monthEndStr(year, month)),
     [user, year, month]
   );
 
-  const { data: report, isLoading, isRefreshing, refresh } = useCache<MonthlyReport>(cacheKey, fetcher);
+  const fetchMenu = useCallback(
+    (isRefresh: boolean) => getMenu(undefined, undefined, isRefresh).then(r => r.menu),
+    []
+  );
+
+  const { data: report, isLoading: reportLoading, isRefreshing: reportRefreshing, refresh: refreshReport } = useCache<MonthlyReport>(cacheKey, fetchReport);
+  const { data: menu, isLoading: menuLoading, isRefreshing: menuRefreshing, refresh: refreshMenu } = useCache<MenuItem[]>('weekly_menu', fetchMenu, 24 * 60 * 60 * 1000);
+
+  const refresh = async () => {
+    await Promise.all([refreshReport(), refreshMenu()]);
+  };
+
+  const isLoading = reportLoading || menuLoading;
+  const isRefreshing = reportRefreshing || menuRefreshing;
 
   const goBack = () => { if (month === 1) { setYear(y => y - 1); setMonth(12); } else setMonth(m => m - 1); };
   const goForward = () => { if (month === 12) { setYear(y => y + 1); setMonth(1); } else setMonth(m => m + 1); };
 
   if (isLoading) return (
     <div className={styles.page}>
-      <div className={styles.header}><h1 className={styles.pageTitle}>Monthly Report</h1></div>
+      <div className={styles.header}>
+        <h1 className={styles.pageTitle}>Monthly Report</h1>
+      </div>
       <div className="page-content" style={{ padding: 16 }}><ReportSkeleton /></div>
     </div>
   );
 
   const { summary, orders } = report ?? { summary: null, orders: [] };
+
+  // Match menu description for selected order
+  const getSelectedDescription = () => {
+    if (!selectedOrder || !menu) return null;
+    const day = getDayOfWeek(new Date(selectedOrder.date));
+    return menu.find(m => m.day === day && m.slot === selectedOrder.slot)?.description;
+  };
+  const selectedDescription = getSelectedDescription();
 
   return (
     <div className={styles.page}>
@@ -82,6 +106,7 @@ export default function ReportPage() {
               <span>Slot</span>
               <span>Qty</span>
               <span>Status</span>
+              <span style={{ textAlign: 'right' }}>Cr.</span>
             </div>
             {[...orders].sort((a,b) => a.date.localeCompare(b.date)).map((o) => {
               const statusCls = o.is_skipped ? 'badge-neutral' : o.is_delivered ? 'badge-success' : 'badge-primary';
@@ -94,11 +119,15 @@ export default function ReportPage() {
                   </span>
                   <span className={styles.tdQty}>{o.quantity_delivered}/{o.quantity_ordered}</span>
                   <span className={`badge ${statusCls}`}>{statusLabel}</span>
+                  <span style={{ textAlign: 'right', fontWeight: 700, color: o.credits_deducted > 0 ? 'var(--color-error)' : 'var(--color-text-tertiary)' }}>
+                    {o.credits_deducted > 0 ? `-${o.credits_deducted}` : '—'}
+                  </span>
                 </div>
               );
             })}
           </div>
         )}
+        <Footer />
       </div>
 
       <BottomSheet isOpen={!!selectedOrder} onClose={() => setSelectedOrder(null)} title="Order Details">
@@ -108,6 +137,11 @@ export default function ReportPage() {
               <label>Date</label>
               <span>{formatShortDate(selectedOrder.date)} ({selectedOrder.slot === 'lunch' ? 'Lunch' : 'Dinner'})</span>
             </div>
+            {selectedDescription && (
+              <div className={styles.descriptionDetail}>
+                {selectedDescription}
+              </div>
+            )}
             <div className={styles.detailRow}>
               <label>Status</label>
               <span>{selectedOrder.is_skipped ? 'Skipped' : selectedOrder.is_delivered ? 'Delivered' : 'Pending'}</span>
@@ -118,7 +152,9 @@ export default function ReportPage() {
             </div>
             <div className={styles.detailRow}>
               <label>Credits Deducted</label>
-              <span>{selectedOrder.credits_deducted}</span>
+              <span style={{ color: selectedOrder.credits_deducted > 0 ? 'var(--color-error)' : 'inherit' }}>
+                {selectedOrder.credits_deducted > 0 ? `-${selectedOrder.credits_deducted}` : '0'}
+              </span>
             </div>
             <div className={styles.detailRow} style={{ borderBottom: 'none' }}>
               <label>Order ID</label>

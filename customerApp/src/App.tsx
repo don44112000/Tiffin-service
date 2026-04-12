@@ -14,6 +14,8 @@ import AddMealPage from './pages/AddMeal/AddMealPage';
 import ExtendPlanPage from './pages/ExtendPlan/ExtendPlanPage';
 import ReportPage from './pages/Report/ReportPage';
 import ProfilePage from './pages/Profile/ProfilePage';
+import CreditHistoryPage from './pages/CreditHistory/CreditHistoryPage';
+import WeeklyMenuPage from './pages/WeeklyMenu/WeeklyMenuPage';
 
 import { ROUTES } from './utils/constants';
 
@@ -53,6 +55,12 @@ function AppLayout() {
         } />
         <Route path={ROUTES.PROFILE} element={
           <ProtectedRoute><ProfilePage /></ProtectedRoute>
+        } />
+        <Route path={ROUTES.CREDIT_HISTORY} element={
+          <ProtectedRoute><CreditHistoryPage /></ProtectedRoute>
+        } />
+        <Route path={ROUTES.WEEKLY_MENU} element={
+          <ProtectedRoute><WeeklyMenuPage /></ProtectedRoute>
         } />
 
         {/* Fallback */}

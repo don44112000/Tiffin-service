@@ -10,6 +10,7 @@ import { ROUTES } from '../../utils/constants';
 import VegIndicator from '../../components/VegIndicator/VegIndicator';
 import StepperInput from '../../components/StepperInput/StepperInput';
 import DatePickerInput from '../../components/DatePickerInput/DatePickerInput';
+import Footer from '../../components/Footer/Footer';
 import styles from './AddMealPage.module.css';
 
 export default function AddMealPage() {
@@ -136,6 +137,7 @@ export default function AddMealPage() {
         <button className="btn btn-primary" onClick={handleSubmit} disabled={isLoading || cutoffInfo.blocked}>
           {isLoading ? 'Adding meal…' : '🍱 Add Meal'}
         </button>
+        <Footer />
       </div>
     </div>
   );

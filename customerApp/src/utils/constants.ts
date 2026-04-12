@@ -18,4 +18,6 @@ export const ROUTES = {
   EXTEND_PLAN: '/extend-plan',
   REPORT: '/report',
   PROFILE: '/profile',
+  CREDIT_HISTORY: '/credit-history',
+  WEEKLY_MENU: '/weekly-menu',
 };

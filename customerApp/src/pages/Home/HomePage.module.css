@@ -96,3 +96,135 @@
 .reportBannerTitle { font-size: var(--font-size-md); font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
 .reportBannerDesc { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
 .reportChevron { color: var(--color-primary); }
+
+/* Next Meal Card */
+.nextMealCard {
+  margin: 0 16px 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  border: 1.5px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.nextMealBadge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--color-primary);
+  color: white;
+  padding: 4px 12px;
+  border-bottom-left-radius: var(--radius-lg);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nextMealHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nextMealIcon {
+  color: var(--color-primary);
+  opacity: 0.8;
+}
+
+.nextMealTitle {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.nextMealDish {
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.nextMealDesc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Weekly Menu */
+.weeklyMenu {
+  padding: 16px;
+  overflow: hidden;
+}
+
+.menuScroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 4px 16px;
+  margin: 0 -4px -16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.menuScroll::-webkit-scrollbar { display: none; }
+
+.menuCard {
+  flex: 0 0 140px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  border: 1.5px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.2s;
+}
+
+.menuCard.today {
+  border-color: var(--color-primary);
+  background: rgba(255, 82, 0, 0.02);
+}
+
+.menuDay {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+}
+
+.menuItems {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.menuItemRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menuSlot {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.menuDish {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

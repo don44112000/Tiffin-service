@@ -47,8 +47,9 @@
 }
 
 .tableHeader {
-  display: grid; grid-template-columns: 1fr 60px 50px 80px;
-  padding: 10px 14px;
+  display: grid; 
+  grid-template-columns: 1.5fr 1fr 1fr 1.5fr 1fr;
+  padding: 12px 14px;
   background: var(--color-surface-2);
   border-bottom: 1px solid var(--color-border);
   font-size: var(--font-size-xs);
@@ -56,27 +57,40 @@
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  align-items: center;
+}
+
+.tableHeader span:nth-child(2),
+.tableHeader span:nth-child(3),
+.tableHeader span:nth-child(4) {
+  text-align: center;
 }
 
 .tableRow {
-  display: grid; grid-template-columns: 1fr 60px 50px 80px;
-  padding: 10px 14px;
+  display: grid; 
+  grid-template-columns: 1.5fr 1fr 1fr 1.5fr 1fr;
+  padding: 12px 14px;
   align-items: center;
   border-bottom: 1px solid var(--color-border-light);
   transition: background var(--transition-fast);
   cursor: pointer;
 }
+
 .tableRow :global(.badge) {
-  justify-self: flex-start;
+  justify-self: center;
 }
+
 .tableRow:last-child { border-bottom: none; }
 .tableRow:hover { background: var(--color-surface-2); }
 
-.tdDate { font-size: var(--font-size-base); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
-.tdQty { font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+.tdDate { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
+.tdQty { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); text-align: center; }
 
-.lunchBadge { background: var(--color-primary-10); color: var(--color-primary-dark); justify-self: flex-start; }
-.dinnerBadge { background: rgba(0, 0, 0, 0.05); color: var(--color-text-primary); justify-self: flex-start; }
+.lunchBadge, .dinnerBadge { 
+  justify-self: center !important; 
+}
+.lunchBadge { background: var(--color-primary-10); color: var(--color-primary-dark); }
+.dinnerBadge { background: rgba(0, 0, 0, 0.05); color: var(--color-text-primary); }
 
 .empty {
   text-align: center; padding: 48px 20px;
@@ -100,4 +114,16 @@
   color: var(--color-text-primary);
   font-weight: var(--font-weight-bold);
   text-align: right;
+}
+
+.descriptionDetail {
+  padding: 10px 12px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  line-height: 1.4;
+  margin-top: -8px;
+  margin-bottom: 12px;
+  border-left: 3px solid var(--color-primary);
 }

@@ -4,6 +4,7 @@ import { Phone, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { ROUTES } from '../../utils/constants';
+import Footer from '../../components/Footer/Footer';
 import styles from './LoginPage.module.css';
 
 export default function LoginPage() {
@@ -109,6 +110,9 @@ export default function LoginPage() {
             </Link>
           </p>
         </form>
+      </div>
+      <div className={styles.footerWrap}>
+        <Footer />
       </div>
     </div>
   );

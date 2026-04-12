@@ -9,6 +9,7 @@ import { ROUTES } from '../../utils/constants';
 import { todayStr, addDays } from '../../utils/dates';
 import DatePickerInput from '../../components/DatePickerInput/DatePickerInput';
 import ActionProcessingLoader from '../../components/Loader/ActionProcessingLoader';
+import Footer from '../../components/Footer/Footer';
 import styles from './RegisterPage.module.css';
 
 type Plan = 'lunch' | 'dinner' | 'both';
@@ -223,6 +224,9 @@ export default function RegisterPage() {
             </button>
           </div>
         )}
+      </div>
+      <div className={styles.footerWrap}>
+        <Footer />
       </div>
     </div>
   );

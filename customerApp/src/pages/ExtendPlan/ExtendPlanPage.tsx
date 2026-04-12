@@ -9,6 +9,7 @@ import { ROUTES } from '../../utils/constants';
 import StepperInput from '../../components/StepperInput/StepperInput';
 import DatePickerInput from '../../components/DatePickerInput/DatePickerInput';
 import ActionProcessingLoader from '../../components/Loader/ActionProcessingLoader';
+import Footer from '../../components/Footer/Footer';
 import styles from './ExtendPlanPage.module.css';
 
 type Plan = 'lunch' | 'dinner' | 'both';
@@ -123,6 +124,7 @@ export default function ExtendPlanPage() {
         <button className="btn btn-primary" onClick={handleSubmit} disabled={isLoading || hasDaysError}>
           {isLoading ? 'Extending plan…' : '📅 Extend Plan'}
         </button>
+        <Footer />
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../utils/constants';
 import BottomSheet from '../../components/BottomSheet/BottomSheet';
 import RefreshButton from '../../components/RefreshButton/RefreshButton';
+import Footer from '../../components/Footer/Footer';
 import { ProfileSkeleton } from '../../components/Skeleton/Skeleton';
 import styles from './ProfilePage.module.css';
 
@@ -80,10 +81,10 @@ export default function ProfilePage() {
               <span className={styles.since}>Member since {user.created_at?.split('T')[0] ?? '—'}</span>
             </div>
           </div>
-          <div className={styles.creditBadge}>
+          <button className={styles.creditBadge} onClick={() => navigate(ROUTES.CREDIT_HISTORY)}>
             <Coins size={14} />
             <span>{user.credit_balance ?? 0}</span>
-          </div>
+          </button>
         </div>
 
         {/* Account settings */}
@@ -142,6 +143,7 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
+        <Footer />
       </div>
 
       {/* Edit Name */}

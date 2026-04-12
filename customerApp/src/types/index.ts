@@ -106,3 +106,42 @@ export interface ApiResponse<T = unknown> {
   message?: string;
   data?: T;
 }
+
+// ── Credit History ────────────────────────────────────────────────────────
+
+export interface CreditHistoryItem {
+  history_id: string;
+  user_id: string;
+  date: string;
+  type: 'credit' | 'debit';
+  amount: number;
+  reason: string;
+  created_at: string;
+}
+
+export interface CreditHistoryResponse {
+  success: boolean;
+  summary: {
+    total_credited: number;
+    total_debited: number;
+    net: number;
+  };
+  total: number;
+  history: CreditHistoryItem[];
+}
+
+// ── Menu ──────────────────────────────────────────────────────────────────
+
+export interface MenuItem {
+  menu_id: string;
+  day: string;
+  slot: 'lunch' | 'dinner';
+  dish_name: string;
+  description: string;
+}
+
+export interface GetMenuResponse {
+  success: boolean;
+  total: number;
+  menu: MenuItem[];
+}
