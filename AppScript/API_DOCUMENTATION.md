@@ -25,6 +25,8 @@
 | **orders**        | `order_id`, `user_id`, `date`, `slot`, `type`, `address`, `quantity_ordered`, `quantity_delivered`, `credits_used`, `is_delivered`, `delivered_at`, `created_at`, `is_skipped` |
 | **payments**      | *(referenced but not actively used in current code)*                                                                                       |
 | **completed_days**| `completion_id`, `date`, `total_credits_deducted`, `completed_at`, `completed_by`                                                          |
+| **menu**          | `menu_id`, `day`, `slot`, `dish_name`, `description`                                                                                       |
+| **credit_history**| `history_id`, `user_id`, `date`, `type`, `amount`, `reason`, `created_at`                                                                  |
 
 ---
 
@@ -368,7 +370,45 @@ Adds a single new order for a specific user, date, and slot.
 
 ---
 
-### 10. `GET` — Get Monthly Report (User or Admin)
+### 10. `GET` — Get Menu (User or Admin)
+
+**Action:** `get_menu`
+
+> Accessible with **both** user and admin secrets.
+
+**Query Parameters:**
+```
+?action=get_menu&secret=FOOD2026&day=monday&slot=lunch
+```
+> All parameters except `action` and `secret` are optional.
+> - If `day` is omitted, returns the full week's menu.
+> - If `slot` is omitted, returns both lunch and dinner for the given day.
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "total": 1,
+  "menu": [
+    {
+      "menu_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "day": "monday",
+      "slot": "lunch",
+      "dish_name": "Veg Pulao",
+      "description": "Served with raita and pickle"
+    }
+  ]
+}
+```
+
+**Error Responses:**
+| Condition    | Message        |
+| ------------ | -------------- |
+| Wrong secret | `"Unauthorized"` |
+
+---
+
+### 11. `GET` — Get Monthly Report (User or Admin)
 
 **Action:** `get_monthly_report`
 
@@ -415,9 +455,60 @@ Adds a single new order for a specific user, date, and slot.
 
 ---
 
+### 12. `GET` — Get Credit History (User or Admin)
+
+**Action:** `get_credit_history`
+
+> Accessible with **both** user and admin secrets.
+
+**Query Parameters:**
+```
+?action=get_credit_history&secret=FOOD2026&user_id=uuid&start_date=2026-04-01&end_date=2026-04-30
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "summary": {
+    "total_credited": 100,
+    "total_debited": 40,
+    "net": 60
+  },
+  "total": 2,
+  "history": [
+    {
+      "history_id": "uuid",
+      "date": "2026-04-12",
+      "type": "credit",
+      "amount": 100,
+      "reason": "recharge",
+      "created_at": "2026-04-12T10:00:00Z"
+    },
+    {
+      "history_id": "uuid",
+      "date": "2026-04-12",
+      "type": "debit",
+      "amount": 40,
+      "reason": "day_completion",
+      "created_at": "2026-04-12T20:00:00Z"
+    }
+  ]
+}
+```
+
+**Error Responses:**
+| Condition        | Message                                           |
+| ---------------- | ------------------------------------------------- |
+| Missing params   | `"user_id, start_date and end_date are required"` |
+| Missing dates      | `"start_date and end_date are required"`       |
+| Missing user_id    | `"user_id is required"`                        |
+
+---
+
 ## Admin APIs (secret = `ADMIN2026`)
 
-### 11. `POST` — Mark Delivered
+### 12. `POST` — Mark Delivered
 
 **Action:** `mark_delivered`
 
@@ -451,7 +542,7 @@ Adds a single new order for a specific user, date, and slot.
 
 ---
 
-### 12. `POST` — Recharge Credits
+### 13. `POST` — Recharge Credits
 
 **Action:** `recharge_credits`
 
@@ -486,7 +577,7 @@ Adds a single new order for a specific user, date, and slot.
 
 ---
 
-### 13. `POST` — Admin Update Customer
+### 14. `POST` — Admin Update Customer
 
 **Action:** `admin_update_customer`
 
@@ -517,7 +608,7 @@ Adds a single new order for a specific user, date, and slot.
 
 ---
 
-### 14. `GET` — Get All Users
+### 15. `GET` — Get All Users
 
 **Action:** `get_all_users`
 
@@ -550,7 +641,7 @@ Adds a single new order for a specific user, date, and slot.
 
 ---
 
-### 15. `GET` — Get Orders by Date & Slot
+### 16. `GET` — Get Orders by Date & Slot
 
 **Action:** `get_orders_by_date_slot`
 
@@ -564,22 +655,28 @@ Adds a single new order for a specific user, date, and slot.
 {
   "success": true,
   "total": 3,
-  "orders": [
+  "total_users": 2,
+  "grouped": [
     {
-      "order_id": "uuid",
-      "user_id": "uuid",
-      "date": "2026-04-12",
-      "slot": "lunch",
-      "type": "veg",
-      "address": "Building A",
-      "quantity_ordered": 1,
-      "quantity_delivered": 0,
-      "credits_used": 0,
-      "is_delivered": false,
-      "delivered_at": "",
-      "created_at": "2026-04-11T...",
-      "is_skipped": false,
-      "customer_name": "John Doe"
+      "user_id": "uuid1",
+      "customer_name": "John Doe",
+      "orders": [
+        {
+          "order_id": "uuid",
+          "user_id": "uuid1",
+          "date": "2026-04-12",
+          "slot": "lunch",
+          "type": "veg",
+          "address": "Building A",
+          "quantity_ordered": 1,
+          "quantity_delivered": 0,
+          "credits_used": 0,
+          "is_delivered": false,
+          "delivered_at": "",
+          "created_at": "2026-04-11T...",
+          "is_skipped": false
+        }
+      ]
     }
   ]
 }
@@ -593,7 +690,7 @@ Adds a single new order for a specific user, date, and slot.
 
 ---
 
-### 16. `GET` — Get Dashboard
+### 17. `GET` — Get Dashboard
 
 **Action:** `get_dashboard`
 
@@ -631,7 +728,7 @@ Adds a single new order for a specific user, date, and slot.
 
 ---
 
-### 17. `POST` — Mark Day Complete (Reconcile)
+### 18. `POST` — Mark Day Complete (Reconcile)
 
 **Action:** `mark_day_complete`
 
@@ -665,7 +762,7 @@ Sums `credits_used` for all non-skipped orders on the given date, deducts from e
 
 ---
 
-### 18. `GET` — Get Negative Credits
+### 19. `GET` — Get Negative Credits
 
 **Action:** `get_negative_credits`
 
@@ -692,7 +789,7 @@ Sums `credits_used` for all non-skipped orders on the given date, deducts from e
 
 ---
 
-### 19. `POST` — Reduce Credits Against Order
+### 20. `POST` — Reduce Credits Against Order
 
 **Action:** `reduce_credits_against_order`
 
@@ -727,6 +824,41 @@ Adds extra credits to an order. If the day is already reconciled, it also immedi
 | Missing fields       | `"order_id and credits_to_add are required"` |
 | `credits_to_add <= 0`| `"credits_to_add must be a number greater than 0"` |
 | Order not found      | `"Order not found"`                          |
+
+---
+
+### 21. `POST` — Upsert Menu (Admin)
+
+**Action:** `upsert_menu`
+
+**Request Body:**
+```json
+{
+  "secret": "ADMIN2026",
+  "action": "upsert_menu",
+  "day": "monday",
+  "slot": "lunch",
+  "dish_name": "Veg Pulao",
+  "description": "Served with raita and pickle"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Menu updated",
+  "menu_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+}
+```
+> Returns `"Menu created"` if it's a new entry.
+
+**Error Responses:**
+| Condition              | Message                                      |
+| ---------------------- | -------------------------------------------- |
+| Missing required       | `"day, slot and dish_name are required"`     |
+| Invalid day            | `"Invalid day"`                              |
+| Invalid slot           | `"slot must be lunch or dinner"`             |
 
 ---
 

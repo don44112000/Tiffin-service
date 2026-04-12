@@ -11,6 +11,7 @@ function doPost(e) {
       if (action === "mark_day_complete") return markDayComplete(body);
       if (action === "reduce_credits_against_order")
         return reduceCreditsAgainstOrder(body);
+      if (action === "upsert_menu") return upsertMenu(body);
       return response({ success: false, message: "Unknown admin action" });
     }
 
@@ -46,6 +47,8 @@ function doGet(e) {
       if (action === "get_negative_credits")
         return getNegativeCredits(e.parameter);
       if (action === "get_monthly_report") return getMonthlyReport(e.parameter);
+      if (action === "get_menu") return getMenu(e.parameter);
+      if (action === "get_credit_history") return getCreditHistory(e.parameter);
       return response({ success: false, message: "Unknown admin action" });
     }
 
@@ -57,6 +60,8 @@ function doGet(e) {
     if (action === "get_customer") return getCustomer(e.parameter);
     if (action === "get_orders_by_user") return getOrdersByUser(e.parameter);
     if (action === "get_monthly_report") return getMonthlyReport(e.parameter);
+    if (action === "get_menu") return getMenu(e.parameter);
+    if (action === "get_credit_history") return getCreditHistory(e.parameter);
     return response({ success: false, message: "Unknown action" });
   } catch (err) {
     return response({ success: false, message: err.message });

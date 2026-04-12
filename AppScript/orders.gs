@@ -304,24 +304,42 @@ function getOrdersByDateSlot(params) {
       customerData[i][customerNameIndex];
   }
 
-  const orders = [];
+  const grouped = {};
+  let total = 0;
+
   for (let i = 1; i < data.length; i++) {
     const orderDate = toISTDateStr(data[i][dateIndex]);
     const dateMatch = orderDate === params.date;
     const slotMatch = data[i][slotIndex] === params.slot;
 
     if (dateMatch && slotMatch) {
+      total++;
+      const userId = data[i][userIdIndex];
       const order = {};
       headers.forEach((header, index) => {
         order[header] = data[i][index];
       });
-      // Attach customer name
-      order.customer_name = nameMap[data[i][userIdIndex]] || "Unknown";
-      orders.push(order);
+
+      if (!grouped[userId]) {
+        grouped[userId] = {
+          user_id: userId,
+          customer_name: nameMap[userId] || "Unknown",
+          orders: []
+        };
+      }
+      grouped[userId].orders.push(order);
     }
   }
 
-  return response({ success: true, total: orders.length, orders });
+  // Convert map to array for easier consumption
+  const groupedArray = Object.values(grouped);
+
+  return response({ 
+    success: true, 
+    total: total, 
+    total_users: groupedArray.length,
+    grouped: groupedArray 
+  });
 }
 
 function skipOrder(body) {

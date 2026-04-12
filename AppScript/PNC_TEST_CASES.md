@@ -195,8 +195,8 @@
 
 | #     | Type | Test Case                                      | Expected                                      |
 | ----- | ---- | ---------------------------------------------- | --------------------------------------------- |
-| 15.1  | ✅🔗P | Get orders for specific date + lunch           | `success: true`, orders include `customer_name` |
-| 15.1.a| ✅🔗P | Get orders for specific date + dinner          | `success: true`, orders include `customer_name` |
+| 15.1  | ✅🔗P | Get orders for specific date + lunch           | `success: true`, returns `grouped` array      |
+| 15.1.a| ✅🔗P | Get orders for specific date + dinner          | `success: true`, returns `grouped` array      |
 | 15.2  | ❌ N | Get orders without `date`                      | `"date and slot are required"`                |
 | 15.3  | ❌ N | Get orders without `slot`                      | `"date and slot are required"`                |
 | 15.4  | ❌ N | Get orders with invalid slot (`"morning"`)     | `"slot must be lunch or dinner"`              |
@@ -268,6 +268,39 @@
 
 ---
 
+## 22. Menu APIs
+
+| #     | Type | Test Case                                      | Expected                                      |
+| ----- | ---- | ---------------------------------------------- | --------------------------------------------- |
+| 22.1  | ✅ P | Upsert menu (Monday Lunch)                     | `success: true`, `"Menu created"`             |
+| 22.2  | ✅ P | Upsert menu (Monday Dinner)                    | `success: true`, `"Menu created"`             |
+| 22.3  | ✅ P | Update existing menu (Monday Lunch)            | `success: true`, `"Menu updated"`             |
+| 22.4  | ❌ N | Upsert menu with missing `day`                 | `"day, slot and dish_name are required"`      |
+| 22.5  | ❌ N | Upsert menu with invalid `day` (`"funday"`)    | `"Invalid day"`                               |
+| 22.6  | ❌ N | Upsert menu with invalid `slot` (`"snack"`)    | `"slot must be lunch or dinner"`              |
+| 22.7  | ✅ P | Get full week menu                             | `success: true`, returns list of menu items   |
+| 22.8  | ✅ P | Get menu for specific day (Monday)             | `success: true`, returns only Monday items    |
+| 22.9  | ✅ P | Get menu for specific day & slot               | `success: true`, returns 1 item               |
+| 22.10 | ❌ N | Upsert menu with User secret                   | `"Unauthorized"`                              |
+| 22.11 | ✅ P | Get menu with Admin secret                     | `success: true`, returns list of menu items   |
+
+---
+
+## 23. Credit History
+
+| #     | Type | Test Case                                      | Expected                                      |
+| ----- | ---- | ---------------------------------------------- | --------------------------------------------- |
+| 23.1  | ✅ P | Get credit history for valid user + date range | `success: true`, summary + history array      |
+| 23.2  | ✅🔗P | Verify recharge log in credit history          | `type: "credit"`, `reason: "recharge"`        |
+| 23.3  | ✅🔗P | Verify day completion log in credit history    | `type: "debit"`, `reason: "day_completion"`   |
+| 23.4  | ❌ N | Missing `user_id`                              | `"user_id, start_date and end_date are required"` |
+| 23.5  | ❌ N | Missing `start_date`                           | `"user_id, start_date and end_date are required"` |
+| 23.6  | ✅ P | Get history for date range with no movements   | `success: true`, `total: 0`, empty array      |
+
+---
+
+---
+
 ## Test Execution Order (Chained Flow)
 
 The following is the recommended order for running tests sequentially, since many tests depend on data created by earlier tests:
@@ -295,7 +328,9 @@ The following is the recommended order for running tests sequentially, since man
 20. Get Negative Credits (19.1)    — check negative balances
 21. Monthly Report (21.1–21.5)     — final report
 22. Extend Plan (9.1–9.10)         — extend the plan
-23. Edge Cases (8.3, 11.7, etc.)   — run structural type checking
+23. Menu APIs (22.1–22.11)         — admin menu management
+24. Credit History (23.1–23.6)     — verify logs and summaries
+25. Edge Cases (8.3, 11.7, etc.)   — run structural type checking
 ```
 
-**Total Test Cases: ~95**
+**Total Test Cases: ~110**

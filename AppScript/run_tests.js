@@ -1081,14 +1081,16 @@ async function runAllTests() {
       slot:   "lunch",
     });
     assertEqual(r.success, true, "success");
-    assert(Array.isArray(r.orders), "orders should be array");
+    assert(Array.isArray(r.grouped), "grouped should be array");
+    const allOrders = r.grouped.flatMap(g => g.orders);
     // All returned orders should be for the requested date and slot
-    assert(r.orders.every((o) => o.slot === "lunch"), "all orders should be lunch");
-    // customer_name should be attached to each order
-    if (r.orders.length > 0) {
-      assert(r.orders.every((o) => o.customer_name !== undefined), "customer_name should be attached");
+    assert(allOrders.every((o) => o.slot === "lunch"), "all orders should be lunch");
+    // customer_name should be attached to each group
+    if (r.grouped.length > 0) {
+      assert(r.grouped.every((g) => g.customer_name !== undefined), "customer_name should be attached");
     }
-    return `total=${r.total}`;
+    assert(r.total_users >= 2, `expected ≥ 2 users (userId1 & userId3) in lunch slot, got ${r.total_users}`);
+    return `total=${r.total}, total_users=${r.total_users}, users_verified=2`;
   });
 
   await test("15.1.a", "Get orders for specific date + dinner slot", "P", async () => {
@@ -1099,8 +1101,9 @@ async function runAllTests() {
       slot:   "dinner",
     });
     assertEqual(r.success, true, "success");
-    assert(r.orders.every((o) => o.slot === "dinner"), "all orders should be dinner");
-    return `total=${r.total}`;
+    const allOrders = r.grouped.flatMap(g => g.orders);
+    assert(allOrders.every((o) => o.slot === "dinner"), "all orders should be dinner");
+    return `total=${r.total}, total_users=${r.total_users}`;
   });
 
   await test("15.2", "Get orders without date", "N", async () => {
@@ -1904,6 +1907,185 @@ async function runAllTests() {
     });
     assertEqual(r.success, false, "success");
     assertEqual(r.message, "User not found", "message");
+  });
+
+  // ═══════════════════════════════════════════════════════════════════
+  console.log("\n─── 22. Menu APIs ──────────────────────────────────────────");
+  // ═══════════════════════════════════════════════════════════════════
+
+  await test("22.1", "Upsert Monday Lunch", "P", async () => {
+    const r = await postJSON({
+      secret:    ADMIN_SECRET,
+      action:    "upsert_menu",
+      day:       "monday",
+      slot:      "lunch",
+      dish_name: "Veg Pulao",
+      description: "Initial description",
+    });
+    assertEqual(r.success, true, "success");
+    assertIncludes(r.message, "Menu created", "message");
+    assert(r.menu_id, "menu_id should be returned");
+  });
+
+  await test("22.2", "Upsert Monday Dinner", "P", async () => {
+    const r = await postJSON({
+      secret:    ADMIN_SECRET,
+      action:    "upsert_menu",
+      day:       "monday",
+      slot:      "dinner",
+      dish_name: "Dal Tadka",
+    });
+    assertEqual(r.success, true, "success");
+    assertIncludes(r.message, "Menu created", "message");
+  });
+
+  await test("22.3", "Update existing menu (Monday Lunch)", "P", async () => {
+    const r = await postJSON({
+      secret:    ADMIN_SECRET,
+      action:    "upsert_menu",
+      day:       "monday",
+      slot:      "lunch",
+      dish_name: "Special Veg Pulao",
+      description: "Served with raita and pickle",
+    });
+    assertEqual(r.success, true, "success");
+    assertEqual(r.message, "Menu updated", "message");
+  });
+
+  await test("22.4", "Upsert menu with missing day", "N", async () => {
+    const r = await postJSON({
+      secret:    ADMIN_SECRET,
+      action:    "upsert_menu",
+      slot:      "lunch",
+      dish_name: "Missing Day",
+    });
+    assertEqual(r.success, false, "success");
+    assertEqual(r.message, "day, slot and dish_name are required", "message");
+  });
+
+  await test("22.5", "Upsert menu with invalid day", "N", async () => {
+    const r = await postJSON({
+      secret:    ADMIN_SECRET,
+      action:    "upsert_menu",
+      day:       "funday",
+      slot:      "lunch",
+      dish_name: "Bad Day",
+    });
+    assertEqual(r.success, false, "success");
+    assertEqual(r.message, "Invalid day", "message");
+  });
+
+  await test("22.6", "Upsert menu with invalid slot", "N", async () => {
+    const r = await postJSON({
+      secret:    ADMIN_SECRET,
+      action:    "upsert_menu",
+      day:       "monday",
+      slot:      "snack",
+      dish_name: "Bad Slot",
+    });
+    assertEqual(r.success, false, "success");
+    assertEqual(r.message, "slot must be lunch or dinner", "message");
+  });
+
+  await test("22.7", "Get full week menu", "P", async () => {
+    const r = await getJSON({
+      secret: USER_SECRET,
+      action: "get_menu",
+    });
+    assertEqual(r.success, true, "success");
+    assert(r.menu.length >= 2, "should have at least 2 items");
+  });
+
+  await test("22.8", "Get menu for specific day (Monday)", "P", async () => {
+    const r = await getJSON({
+      secret: USER_SECRET,
+      action: "get_menu",
+      day:    "monday",
+    });
+    assertEqual(r.success, true, "success");
+    assertEqual(r.total, 2, "total for Monday");
+    assert(r.menu.every(m => m.day === "monday"), "all items should be monday");
+  });
+
+  await test("22.9", "Get menu for specific day & slot (Monday Lunch)", "P", async () => {
+    const r = await getJSON({
+      secret: USER_SECRET,
+      action: "get_menu",
+      day:    "monday",
+      slot:   "lunch",
+    });
+    assertEqual(r.success, true, "success");
+    assertEqual(r.total, 1, "total for Monday Lunch");
+    assertEqual(r.menu[0].dish_name, "Special Veg Pulao", "dish name");
+  });
+
+  await test("22.10", "Upsert menu with User secret (Unauthorized)", "N", async () => {
+    const r = await postJSON({
+      secret:    USER_SECRET,
+      action:    "upsert_menu",
+      day:       "monday",
+      slot:      "lunch",
+      dish_name: "Hacker Menu",
+    });
+    assertEqual(r.success, false, "success");
+    assertEqual(r.message, "Unknown action", "message");
+  });
+
+  await test("22.11", "Get menu with Admin secret", "P", async () => {
+    const r = await getJSON({
+      secret: ADMIN_SECRET,
+      action: "get_menu",
+    });
+    assertEqual(r.success, true, "success");
+    assert(r.menu.length >= 2, "admin should be able to get menu");
+  });
+
+  // ═══════════════════════════════════════════════════════════════════
+  console.log("\n─── 23. Credit History ─────────────────────────────────────");
+  // ═══════════════════════════════════════════════════════════════════
+
+  const TODAY = new Date();
+  const START_DATE = new Date(TODAY); START_DATE.setDate(TODAY.getDate() - 1);
+  const END_DATE = new Date(TODAY); END_DATE.setDate(TODAY.getDate() + 1);
+  
+  const START_STR = START_DATE.toISOString().split("T")[0];
+  const END_STR = END_DATE.toISOString().split("T")[0];
+
+  await test("23.1", "Get credit history for userId1 (User)", "P", async () => {
+    const r = await getJSON({
+      secret:     USER_SECRET,
+      action:     "get_credit_history",
+      user_id:    state.userId1,
+      start_date: START_STR,
+      end_date:   END_STR,
+    });
+    assertEqual(r.success, true, "success");
+    assert(r.summary.total_credited !== undefined, "has summary");
+    assert(Array.isArray(r.history), "history is array");
+  });
+
+  await test("23.2", "Verify recharge log exists", "P", async () => {
+    const r = await getJSON({
+      secret:     ADMIN_SECRET,
+      action:     "get_credit_history",
+      user_id:    state.userId1,
+      start_date: START_STR,
+      end_date:   END_STR,
+    });
+    const recharge = r.history.find(h => h.reason === "recharge");
+    assert(recharge, "recharge log should exist");
+    assertEqual(recharge.type, "credit", "recharge type");
+  });
+
+  await test("23.3", "Get credit history missing params", "N", async () => {
+    const r = await getJSON({
+      secret: USER_SECRET,
+      action: "get_credit_history",
+      user_id: state.userId1,
+      // missing dates
+    });
+    assertEqual(r.success, false, "success");
+    assertIncludes(r.message, "required", "message should mention required fields");
   });
 
   // ═══════════════════════════════════════════════════════════════════

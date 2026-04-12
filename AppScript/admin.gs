@@ -41,6 +41,7 @@ function rechargeCredits(body) {
       const currentBalance = data[i][creditIndex] || 0;
       const newBalance = currentBalance + body.amount;
       sheet.getRange(i + 1, creditIndex + 1).setValue(newBalance);
+      logCreditHistory(body.user_id, "credit", body.amount, "recharge");
 
       return response({
         success: true,
@@ -226,6 +227,7 @@ function markDayComplete(body) {
     const newBalance = currentBalance - deduction;
 
     customerSheet.getRange(i + 1, creditBalanceIndex + 1).setValue(newBalance);
+    logCreditHistory(userId, "debit", deduction, "day_completion");
     totalCreditsDeducted += deduction;
   }
 
@@ -349,6 +351,7 @@ function reduceCreditsAgainstOrder(body) {
         const custRowData = [...customerData[i]];
         custRowData[creditBalanceIndex] = currentBalance - body.credits_to_add;
         customerSheet.getRange(i + 1, 1, 1, custRowData.length).setValues([custRowData]);
+        logCreditHistory(orderUserId, "debit", body.credits_to_add, "manual_adjustment");
         break;
       }
     }
@@ -455,5 +458,95 @@ function getMonthlyReport(params) {
       total_credits_deducted: totalCreditsDeducted,
     },
     orders,
+  });
+}
+
+function logCreditHistory(userId, type, amount, reason) {
+  const sheet = getSheet(SHEETS.credit_history);
+  
+  // Initialize headers if sheet is empty
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(["history_id", "user_id", "date", "type", "amount", "reason", "created_at"]);
+  }
+
+  const historyId = Utilities.getUuid();
+  const date = toISTDateStr(new Date());
+  const createdAt = new Date().toISOString();
+
+  sheet.appendRow([
+    historyId,
+    userId,
+    date,
+    type,
+    amount,
+    reason,
+    createdAt
+  ]);
+}
+
+function getCreditHistory(params) {
+  if (!params.user_id || !params.start_date || !params.end_date) {
+    return response({
+      success: false,
+      message: "user_id, start_date and end_date are required",
+    });
+  }
+
+  const sheet = getSheet(SHEETS.credit_history);
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+
+  const historyIdIndex = headers.indexOf("history_id");
+  const userIdIndex = headers.indexOf("user_id");
+  const dateIndex = headers.indexOf("date");
+  const typeIndex = headers.indexOf("type");
+  const amountIndex = headers.indexOf("amount");
+  const reasonIndex = headers.indexOf("reason");
+  const createdAtIndex = headers.indexOf("created_at");
+
+  // Validate headers exist
+  if (userIdIndex === -1 || dateIndex === -1 || reasonIndex === -1) {
+    return response({ success: false, message: "Credit history sheet headers missing or invalid" });
+  }
+
+  let totalCredited = 0;
+  let totalDebited = 0;
+  const history = [];
+
+  const startDateStr = params.start_date;
+  const endDateStr = params.end_date;
+
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][userIdIndex] !== params.user_id) continue;
+
+    const rowDateStr = toISTDateStr(data[i][dateIndex]);
+    
+    if (rowDateStr >= startDateStr && rowDateStr <= endDateStr) {
+      const amount = Number(data[i][amountIndex]);
+      const type = data[i][typeIndex];
+
+      if (type === "credit") totalCredited += amount;
+      if (type === "debit") totalDebited += amount;
+
+      history.push({
+        history_id: data[i][historyIdIndex],
+        date: rowDateStr,
+        type: type,
+        amount: amount,
+        reason: data[i][reasonIndex],
+        created_at: data[i][createdAtIndex]
+      });
+    }
+  }
+
+  return response({
+    success: true,
+    summary: {
+      total_credited: totalCredited,
+      total_debited: totalDebited,
+      net: totalCredited - totalDebited
+    },
+    total: history.length,
+    history: history
   });
 }

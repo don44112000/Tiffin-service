@@ -8,6 +8,8 @@ const SHEETS = {
   orders: "orders",
   payments: "payments",
   completed_days: "completed_days",
+  menu: "menu",
+  credit_history: "credit_history"
 };
 
 function getSheet(name) {
