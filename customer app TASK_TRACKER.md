@@ -4,7 +4,7 @@
 
 ## Phase 1: Foundation
 
-- [ ] Initialize Vite + React + TypeScript project in `frontend/`
+- [ ] Initialize Vite + React + TypeScript project in `customerApp/`
 - [ ] Install dependencies (`react-router-dom`, `date-fns`, `lucide-react`)
 - [ ] Create `.env` and `.env.example` with API URL + secret
 - [ ] Create design system (`index.css`) — CSS custom properties, resets, Outfit font, Swiggy palette

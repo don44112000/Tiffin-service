@@ -803,7 +803,7 @@ Each skeleton matches the **exact layout** of the real content so there's no lay
 ### 7.1 File Structure
 
 ```
-frontend/
+customerApp/
 ├── .env                        ← Environment variables
 ├── .env.example                ← Example env file (committed)
 ├── index.html                  ← Entry point
@@ -933,7 +933,7 @@ function ProtectedRoute({ children }) {
 
 | # | Task | Details |
 |---|------|---------|
-| 1.1 | **Init Vite + React + TS project** | `npx -y create-vite@latest ./ --template react-ts` inside `frontend/` |
+| 1.1 | **Init Vite + React + TS project** | `npx -y create-vite@latest ./ --template react-ts` inside `customerApp/` |
 | 1.2 | **Install dependencies** | `react-router-dom`, `date-fns`, `lucide-react` |
 | 1.3 | **Set up `.env`** | `VITE_API_BASE_URL` and `VITE_API_SECRET` |
 | 1.4 | **Create design system** | `index.css` with all CSS custom properties, global resets, font imports |
@@ -1007,7 +1007,7 @@ function ProtectedRoute({ children }) {
 
 ## 9. Environment Configuration
 
-### `.env` file (at `frontend/.env`)
+### `.env` file (at `customerApp/.env`)
 
 ```env
 # API Configuration
