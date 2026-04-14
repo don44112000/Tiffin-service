@@ -1,14 +1,14 @@
 import { useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, TrendingUp, Package, SkipForward, Coins } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { getMonthlyReport, getMenu } from '../../services/api';
+import { getMonthlyReport } from '../../services/api';
 import { useCache } from '../../hooks/useCache';
-import { monthStartStr, monthEndStr, getMonthLabel, formatShortDate, getDayOfWeek } from '../../utils/dates';
+import { monthStartStr, monthEndStr, getMonthLabel, formatShortDate } from '../../utils/dates';
 import { CACHE_KEYS } from '../../utils/constants';
 import RefreshButton from '../../components/RefreshButton/RefreshButton';
 import BottomSheet from '../../components/BottomSheet/BottomSheet';
 import { ReportSkeleton } from '../../components/Skeleton/Skeleton';
-import type { MonthlyReport, MonthlyReportOrder, MenuItem } from '../../types';
+import type { MonthlyReport, MonthlyReportOrder } from '../../types';
 import Footer from '../../components/Footer/Footer';
 import styles from './ReportPage.module.css';
 
@@ -36,20 +36,7 @@ export default function ReportPage() {
     [user, year, month]
   );
 
-  const fetchMenu = useCallback(
-    (isRefresh: boolean) => getMenu(undefined, undefined, isRefresh).then(r => r.menu),
-    []
-  );
-
-  const { data: report, isLoading: reportLoading, isRefreshing: reportRefreshing, refresh: refreshReport } = useCache<MonthlyReport>(cacheKey, fetchReport);
-  const { data: menu, isLoading: menuLoading, isRefreshing: menuRefreshing, refresh: refreshMenu } = useCache<MenuItem[]>('weekly_menu', fetchMenu, 24 * 60 * 60 * 1000);
-
-  const refresh = async () => {
-    await Promise.all([refreshReport(), refreshMenu()]);
-  };
-
-  const isLoading = reportLoading || menuLoading;
-  const isRefreshing = reportRefreshing || menuRefreshing;
+  const { data: report, isLoading, isRefreshing, refresh } = useCache<MonthlyReport>(cacheKey, fetchReport);
 
   const goBack = () => { if (month === 1) { setYear(y => y - 1); setMonth(12); } else setMonth(m => m - 1); };
   const goForward = () => { if (month === 12) { setYear(y => y + 1); setMonth(1); } else setMonth(m => m + 1); };
@@ -64,14 +51,6 @@ export default function ReportPage() {
   );
 
   const { summary, orders } = report ?? { summary: null, orders: [] };
-
-  // Match menu description for selected order
-  const getSelectedDescription = () => {
-    if (!selectedOrder || !menu) return null;
-    const day = getDayOfWeek(new Date(selectedOrder.date));
-    return menu.find(m => m.day === day && m.slot === selectedOrder.slot)?.description;
-  };
-  const selectedDescription = getSelectedDescription();
 
   return (
     <div className={styles.page}>
@@ -137,11 +116,6 @@ export default function ReportPage() {
               <label>Date</label>
               <span>{formatShortDate(selectedOrder.date)} ({selectedOrder.slot === 'lunch' ? 'Lunch' : 'Dinner'})</span>
             </div>
-            {selectedDescription && (
-              <div className={styles.descriptionDetail}>
-                {selectedDescription}
-              </div>
-            )}
             <div className={styles.detailRow}>
               <label>Status</label>
               <span>{selectedOrder.is_skipped ? 'Skipped' : selectedOrder.is_delivered ? 'Delivered' : 'Pending'}</span>
@@ -166,3 +140,4 @@ export default function ReportPage() {
     </div>
   );
 }
+

@@ -1,11 +1,21 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 200;
   display: flex;
   align-items: flex-end;
   animation: fadeIn 0.2s ease;
+}
+
+@media (min-width: 768px) {
+  .overlay {
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
 }
 
 @keyframes fadeIn {
@@ -24,11 +34,27 @@
   -webkit-overflow-scrolling: touch;
   animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1) both;
   padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+}
+
+@media (min-width: 768px) {
+  .sheet {
+    border-radius: var(--radius-xl);
+    max-width: 540px;
+    animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    padding-bottom: 24px;
+    margin: 0;
+  }
 }
 
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
+}
+
+@keyframes modalIn {
+  from { transform: scale(0.9) translateY(20px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 .handle {

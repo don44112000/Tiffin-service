@@ -116,24 +116,27 @@ export default function HomePage() {
       
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="page-content">
-        {/* Credit Card */}
-        <div className={styles.creditCard} onClick={() => navigate(ROUTES.CREDIT_HISTORY)} style={{ cursor: 'pointer' }}>
-          <div className={styles.creditLeft}>
-            <div className={styles.creditIcon}><Coins size={22} /></div>
-            <div>
-              <p className={styles.creditLabel}>Credit Balance</p>
-              <p className={styles.creditValue}>{creditBalance}</p>
-              <p className={styles.creditSub}>credits remaining</p>
+        {/* Credit & Next Meal Hero Section */}
+        <div className={styles.heroGrid}>
+          {/* Credit Card */}
+          <div className={styles.creditCard} onClick={() => navigate(ROUTES.CREDIT_HISTORY)} style={{ cursor: 'pointer' }}>
+            <div className={styles.creditLeft}>
+              <div className={styles.creditIcon}><Coins size={22} /></div>
+              <div>
+                <p className={styles.creditLabel}>Credit Balance</p>
+                <p className={styles.creditValue}>{creditBalance}</p>
+                <p className={styles.creditSub}>credits remaining</p>
+              </div>
+            </div>
+            <div className={styles.creditRight}>
+              <p className={styles.creditNote}>1 credit = 1 meal</p>
+              <ChevronRight size={20} style={{ opacity: 0.6, marginTop: 8 }} />
             </div>
           </div>
-          <div className={styles.creditRight}>
-            <p className={styles.creditNote}>1 credit = 1 meal</p>
-            <ChevronRight size={20} style={{ opacity: 0.6, marginTop: 8 }} />
-          </div>
-        </div>
 
-        {/* Next Slot Menu */}
-        {menu && <NextMealCard menu={menu} />}
+          {/* Next Slot Menu */}
+          {menu && <NextMealCard menu={menu} />}
+        </div>
 
         {/* Quick Actions */}
         <div className={styles.quickActions}>
@@ -151,80 +154,70 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Today */}
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Today's Meals</h2>
-            <span className={styles.sectionDate}>{getDayLabel(today)}</span>
-          </div>
-          {todayOrders.length === 0 ? (
-            <div className={styles.emptyState}>
-              <Utensils size={32} className={styles.emptyIcon} />
-              <p>No meals scheduled today</p>
-              <button className={`btn btn-sm btn-ghost`} onClick={() => navigate(ROUTES.ADD_MEAL)}>
-                + Add a meal
-              </button>
+        <div className={styles.sectionsContainer}>
+          {/* Today */}
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>Today's Meals</h2>
+              <span className={styles.sectionDate}>{getDayLabel(today)}</span>
             </div>
-          ) : (
-            <div className={styles.orderList}>
-              {todayOrders.map((o) => {
-                const day = getDayOfWeek(new Date(o.date));
-                const item = menu?.find(m => m.day === day && m.slot === o.slot);
-                return (
-                  <OrderCard 
-                    key={o.order_id} 
-                    order={o} 
-                    onRefresh={refreshOrders} 
-                    description={item?.description} 
-                  />
-                );
-              })}
-            </div>
-          )}
-        </section>
+            {todayOrders.length === 0 ? (
+              <div className={styles.emptyState}>
+                <Utensils size={32} className={styles.emptyIcon} />
+                <p>No meals scheduled today</p>
+                <button className={`btn btn-sm btn-ghost`} onClick={() => navigate(ROUTES.ADD_MEAL)}>
+                  + Add a meal
+                </button>
+              </div>
+            ) : (
+              <div className={styles.orderList}>
+                {todayOrders.map((o) => {
+                  const day = getDayOfWeek(new Date(o.date));
+                  const item = menu?.find(m => m.day === day && m.slot === o.slot);
+                  return (
+                    <OrderCard 
+                      key={o.order_id} 
+                      order={o} 
+                      onRefresh={refreshOrders} 
+                      description={item?.description} 
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </section>
 
-        {/* Tomorrow */}
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Tomorrow's Meals</h2>
-            <span className={styles.sectionDate}>{getDayLabel(tomorrow)}</span>
-          </div>
-          {tomorrowOrders.length === 0 ? (
-            <div className={styles.emptyState}>
-              <p>No meals scheduled for tomorrow</p>
-              <button className={`btn btn-sm btn-ghost`} onClick={() => navigate(ROUTES.ADD_MEAL)}>
-                + Add a meal
-              </button>
+          {/* Tomorrow */}
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>Tomorrow's Meals</h2>
+              <span className={styles.sectionDate}>{getDayLabel(tomorrow)}</span>
             </div>
-          ) : (
-            <div className={styles.orderList}>
-              {tomorrowOrders.map((o) => {
-                const day = getDayOfWeek(new Date(o.date));
-                const item = menu?.find(m => m.day === day && m.slot === o.slot);
-                return (
-                  <OrderCard 
-                    key={o.order_id} 
-                    order={o} 
-                    onRefresh={refreshOrders} 
-                    description={item?.description} 
-                  />
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* Report Banner */}
-        <Link to={ROUTES.REPORT} className={styles.reportBanner}>
-          <div className={styles.reportBannerLeft}>
-            <span className={styles.reportBannerIcon}>📊</span>
-            <div>
-              <p className={styles.reportBannerTitle}>Monthly Report</p>
-              <p className={styles.reportBannerDesc}>Track your orders & credits</p>
-            </div>
-          </div>
-          <ChevronRight size={20} className={styles.reportChevron} />
-        </Link>
+            {tomorrowOrders.length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>No meals scheduled for tomorrow</p>
+                <button className={`btn btn-sm btn-ghost`} onClick={() => navigate(ROUTES.ADD_MEAL)}>
+                  + Add a meal
+                </button>
+              </div>
+            ) : (
+              <div className={styles.orderList}>
+                {tomorrowOrders.map((o) => {
+                  const day = getDayOfWeek(new Date(o.date));
+                  const item = menu?.find(m => m.day === day && m.slot === o.slot);
+                  return (
+                    <OrderCard 
+                      key={o.order_id} 
+                      order={o} 
+                      onRefresh={refreshOrders} 
+                      description={item?.description} 
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
 
         <Footer />
       </div>

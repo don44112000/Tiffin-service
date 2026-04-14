@@ -1,14 +1,16 @@
 .page {
   min-height: 100vh;
   background-color: var(--color-bg);
-  padding-bottom: calc(var(--nav-height) + 20px);
+  padding-bottom: calc(var(--nav-height) + 40px);
 }
 
 .header {
   position: sticky;
   top: 0;
-  z-index: 10;
-  background-color: var(--color-surface);
+  z-index: 100;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 16px;
   display: flex;
   align-items: center;
@@ -17,88 +19,194 @@
 }
 
 .backBtn {
-  background: none;
-  border: none;
-  padding: 8px;
-  margin: -8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--color-text-primary);
-  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.backBtn:active {
+  transform: scale(0.95);
+  background: var(--color-surface-2);
 }
 
 .pageTitle {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
+  color: var(--color-text-primary);
 }
 
 .summary {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 20px 16px;
+}
+
+@media (min-width: 768px) {
+  .summary {
+    gap: 24px;
+    padding: 32px 20px;
+  }
 }
 
 .summaryCard {
-  background-color: var(--color-surface);
-  padding: 12px;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  padding: 16px 14px;
+  border-radius: 24px;
   display: flex;
   flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: transform var(--transition-fast);
+  border: 1px solid rgba(0,0,0,0.02);
+}
+
+.cardFeatured {
+  grid-column: span 2;
+  padding: 28px 24px;
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+  color: white;
+  box-shadow: 0 12px 30px rgba(255, 82, 0, 0.25);
+  border: none;
+}
+
+.cardFeatured .sumValue {
+  font-size: 42px;
+  margin-top: 4px;
+}
+
+.cardFeatured .sumLabel {
+  color: rgba(255,255,255,0.8);
+}
+
+.summaryCard:active {
+  transform: scale(0.97);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
   gap: 4px;
+}
+
+.cardIcon {
+  opacity: 0.8;
+}
+
+.cardCredit {
+  background: linear-gradient(135deg, #00B87A 0%, #009664 100%);
+  color: white;
+}
+
+.cardDebit {
+  background: linear-gradient(135deg, #FF5200 0%, #D94400 100%);
+  color: white;
+}
+
+.cardBalance {
+  background: white;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
 }
 
 .sumLabel {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  font-size: 10px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+.cardBalance .sumLabel {
+  color: var(--color-text-secondary);
 }
 
 .sumValue {
-  font-size: var(--font-size-md);
-  font-weight: 600;
+  font-size: var(--font-size-lg);
+  font-weight: 800;
 }
 
-.credit { color: var(--color-success) !important; }
-.debit { color: var(--color-error) !important; }
+.historyContainer {
+  background: var(--color-surface);
+  border-radius: 32px;
+  padding: 24px 16px 16px;
+  margin: 0 8px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--color-border-light);
+}
+
+.listHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  padding: 0 4px;
+}
+
+.listTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.listSubtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
 
 .historyList {
-  padding: 0 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .historyItem {
-  background-color: var(--color-surface);
-  padding: 16px;
-  border-radius: var(--radius-md);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  box-shadow: var(--shadow-sm);
+  gap: 14px;
+  padding: 4px 0;
+  transition: all var(--transition-fast);
+}
+
+.itemIconWrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--icon-color) 12%, white);
+  color: var(--icon-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .itemLeft {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .itemReason {
-  font-weight: 500;
+  font-weight: 600;
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
 }
 
-
 .itemDate {
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
 }
 
 .itemRight {
@@ -109,13 +217,19 @@
 }
 
 .itemAmount {
-  font-weight: 700;
-  font-size: var(--font-size-lg);
+  font-weight: 800;
+  font-size: var(--font-size-md);
 }
 
+.credit { color: var(--color-success); }
+.debit { color: var(--color-text-primary); }
+
 .itemType {
-  font-size: var(--font-size-xs);
-  text-transform: capitalize;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-tertiary);
 }
 
 .emptyState {
@@ -125,10 +239,35 @@
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
-  color: var(--color-text-secondary);
   gap: 12px;
 }
 
-.emptyIcon {
-  opacity: 0.2;
+.emptyIconWrapper {
+  width: 100px;
+  height: 100px;
+  border-radius: 30px;
+  background: var(--color-surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  color: var(--color-text-tertiary);
 }
+
+.emptyState h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.emptyState p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  max-width: 200px;
+  line-height: 1.5;
+}
+
+.emptyIcon {
+  opacity: 0.4;
+}
+

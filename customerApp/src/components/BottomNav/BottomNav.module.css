@@ -13,6 +13,19 @@
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom);
   box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+  transition: max-width var(--transition-base);
+}
+
+@media (min-width: 768px) {
+  .nav { max-width: 720px; }
+}
+
+@media (min-width: 1024px) {
+  .nav { max-width: 1024px; }
+}
+
+@media (min-width: 1440px) {
+  .nav { max-width: 1200px; }
 }
 
 .tab {
@@ -27,6 +40,13 @@
   min-height: 44px;
   padding: 6px 4px;
   position: relative;
+}
+
+@media (min-width: 768px) {
+  .tab {
+    max-width: 200px;
+    margin: 0 auto;
+  }
 }
 
 .tab:active {
