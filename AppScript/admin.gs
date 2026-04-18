@@ -111,22 +111,32 @@ function getDashboard(params) {
     const summary = {
       date: targetDateStr,
       lunch: {
+        total_demand: 0,
         total_ordered: 0,
         total_delivered: 0,
+        veg_demand: 0,
+        non_veg_demand: 0,
         veg_ordered: 0,
         non_veg_ordered: 0,
         veg_delivered: 0,
         non_veg_delivered: 0,
         skipped: 0,
+        veg_skipped: 0,
+        non_veg_skipped: 0,
       },
       dinner: {
+        total_demand: 0,
         total_ordered: 0,
         total_delivered: 0,
+        veg_demand: 0,
+        non_veg_demand: 0,
         veg_ordered: 0,
         non_veg_ordered: 0,
         veg_delivered: 0,
         non_veg_delivered: 0,
         skipped: 0,
+        veg_skipped: 0,
+        non_veg_skipped: 0,
       },
     };
 
@@ -144,11 +154,27 @@ function getDashboard(params) {
 
       if (!summary[slot]) continue;
 
+      // total_demand always counts every order (skipped or not)
+      summary[slot].total_demand += qtyOrdered;
+
+      // veg_demand / non_veg_demand also count all orders regardless of skip
+      if (type === "veg") {
+        summary[slot].veg_demand += qtyOrdered;
+      } else if (type === "non-veg") {
+        summary[slot].non_veg_demand += qtyOrdered;
+      }
+
       if (isSkipped) {
         summary[slot].skipped += qtyOrdered;
+        if (type === "veg") {
+          summary[slot].veg_skipped += qtyOrdered;
+        } else if (type === "non-veg") {
+          summary[slot].non_veg_skipped += qtyOrdered;
+        }
         continue;
       }
 
+      // total_ordered only counts non-skipped (= to prepare)
       summary[slot].total_ordered += qtyOrdered;
       summary[slot].total_delivered += qtyDelivered;
 

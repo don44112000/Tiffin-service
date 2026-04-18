@@ -14,6 +14,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { getCreditHistory } from '../../services/api';
 import { useCache } from '../../hooks/useCache';
+import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
 import { subMonths, format } from 'date-fns';
 import PullToRefresh from '../../components/PullToRefresh/PullToRefresh';
 import RefreshButton from '../../components/RefreshButton/RefreshButton';
@@ -38,6 +39,8 @@ export default function CreditHistoryPage() {
     `credit_history_${user!.user_id}`,
     fetcher
   );
+
+  useRefreshOnReload(refresh);
 
   if (isLoading) {
     return (

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Clock } from "lucide-react";
 import { getMenu } from "../../services/api";
 import { useCache } from "../../hooks/useCache";
+import { useRefreshOnReload } from "../../hooks/useRefreshOnReload";
 import { getDayOfWeek } from "../../utils/dates";
 import RefreshButton from "../../components/RefreshButton/RefreshButton";
 import PullToRefresh from "../../components/PullToRefresh/PullToRefresh";
@@ -39,6 +40,8 @@ export default function WeeklyMenuPage() {
     fetchMenu,
     24 * 60 * 60 * 1000 // Cache for 24 hours
   );
+
+  useRefreshOnReload(refresh);
 
   if (isLoading) {
     return (

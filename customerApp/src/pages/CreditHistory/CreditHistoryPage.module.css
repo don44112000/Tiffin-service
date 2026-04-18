@@ -8,10 +8,9 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding: 16px;
+  background: var(--color-surface);
+  padding: 16px 20px;
+  min-height: 72px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -60,7 +59,7 @@
 
 .summaryCard {
   padding: 16px 14px;
-  border-radius: 24px;
+  border-radius: var(--radius-2xl);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -81,7 +80,7 @@
 }
 
 .cardFeatured .sumValue {
-  font-size: 42px;
+  font-size: var(--font-size-3xl);
   margin-top: 4px;
 }
 
@@ -138,7 +137,7 @@
 
 .historyContainer {
   background: var(--color-surface);
-  border-radius: 32px;
+  border-radius: var(--radius-2xl);
   padding: 24px 16px 16px;
   margin: 0 8px 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);

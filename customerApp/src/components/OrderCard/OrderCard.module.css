@@ -12,8 +12,8 @@
 }
 
 .skipped {
-  opacity: 0.55;
-  border-left: 3px solid var(--color-text-tertiary);
+  opacity: 0.6;
+  border-left: 2px solid var(--color-text-tertiary);
 }
 
 .header {

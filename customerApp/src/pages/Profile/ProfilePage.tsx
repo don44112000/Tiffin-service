@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../utils/constants';
 import BottomSheet from '../../components/BottomSheet/BottomSheet';
 import RefreshButton from '../../components/RefreshButton/RefreshButton';
+import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
+import PullToRefresh from '../../components/PullToRefresh/PullToRefresh';
 import Footer from '../../components/Footer/Footer';
 import { ProfileSkeleton } from '../../components/Skeleton/Skeleton';
 import styles from './ProfilePage.module.css';
@@ -36,6 +38,8 @@ export default function ProfilePage() {
     try { await refreshUser(); }
     finally { setIsRefreshing(false); }
   };
+
+  useRefreshOnReload(handleRefresh);
 
   const save = async (payload: Record<string, string>) => {
     setIsSaving(true);
@@ -67,7 +71,8 @@ export default function ProfilePage() {
         <RefreshButton onRefresh={handleRefresh} isRefreshing={isRefreshing} />
       </div>
 
-      <div className="page-content">
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="page-content">
         {/* User card */}
         <div className={styles.userCard}>
           <div className={styles.avatar}>{initials}</div>
@@ -145,6 +150,7 @@ export default function ProfilePage() {
         )}
         <Footer />
       </div>
+      </PullToRefresh>
 
       {/* Edit Name */}
       <BottomSheet isOpen={nameOpen} onClose={() => setNameOpen(false)} title="Edit Name">

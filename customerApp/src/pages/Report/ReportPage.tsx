@@ -3,9 +3,11 @@ import { ChevronLeft, ChevronRight, TrendingUp, Package, SkipForward, Coins } fr
 import { useAuth } from '../../context/AuthContext';
 import { getMonthlyReport } from '../../services/api';
 import { useCache } from '../../hooks/useCache';
+import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
 import { monthStartStr, monthEndStr, getMonthLabel, formatShortDate } from '../../utils/dates';
 import { CACHE_KEYS } from '../../utils/constants';
 import RefreshButton from '../../components/RefreshButton/RefreshButton';
+import PullToRefresh from '../../components/PullToRefresh/PullToRefresh';
 import BottomSheet from '../../components/BottomSheet/BottomSheet';
 import { ReportSkeleton } from '../../components/Skeleton/Skeleton';
 import type { MonthlyReport, MonthlyReportOrder } from '../../types';
@@ -38,6 +40,8 @@ export default function ReportPage() {
 
   const { data: report, isLoading, isRefreshing, refresh } = useCache<MonthlyReport>(cacheKey, fetchReport);
 
+  useRefreshOnReload(refresh);
+
   const goBack = () => { if (month === 1) { setYear(y => y - 1); setMonth(12); } else setMonth(m => m - 1); };
   const goForward = () => { if (month === 12) { setYear(y => y + 1); setMonth(1); } else setMonth(m => m + 1); };
 
@@ -51,6 +55,7 @@ export default function ReportPage() {
   );
 
   const { summary, orders } = report ?? { summary: null, orders: [] };
+  const creditsTotal = orders.reduce((sum, o) => sum + (o.credits_deducted || 0), 0);
 
   return (
     <div className={styles.page}>
@@ -59,7 +64,8 @@ export default function ReportPage() {
         <RefreshButton onRefresh={refresh} isRefreshing={isRefreshing} />
       </div>
 
-      <div className="page-content">
+      <PullToRefresh onRefresh={refresh}>
+        <div className="page-content">
         {/* Month selector */}
         <div className={styles.monthNav}>
           <button className={styles.navBtn} onClick={goBack}><ChevronLeft size={18} /></button>
@@ -72,7 +78,7 @@ export default function ReportPage() {
           <StatCard icon={<Package size={20} />} label="Ordered" value={summary?.total_ordered ?? 0} color="var(--color-primary)" />
           <StatCard icon={<TrendingUp size={20} />} label="Delivered" value={summary?.total_delivered ?? 0} color="var(--color-success)" />
           <StatCard icon={<SkipForward size={20} />} label="Skipped" value={summary?.total_skipped ?? 0} color="var(--color-text-secondary)" />
-          <StatCard icon={<Coins size={20} />} label="Credits Used" value={summary?.total_credits_deducted ?? 0} color="#CA8A04" />
+          <StatCard icon={<Coins size={20} />} label="Credits Used" value={creditsTotal} color="#CA8A04" />
         </div>
 
         {/* Order table */}
@@ -108,6 +114,7 @@ export default function ReportPage() {
         )}
         <Footer />
       </div>
+      </PullToRefresh>
 
       <BottomSheet isOpen={!!selectedOrder} onClose={() => setSelectedOrder(null)} title="Order Details">
         {selectedOrder && (

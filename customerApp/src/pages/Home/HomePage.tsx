@@ -1,9 +1,10 @@
 import { useCallback, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Coins, ChevronRight, PlusCircle, CalendarRange, Clock, Utensils } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getOrdersByUser, getMenu } from '../../services/api';
 import { useCache } from '../../hooks/useCache';
+import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
 import { todayStr, tomorrowStr, getDayLabel, getDayOfWeek } from '../../utils/dates';
 import { ROUTES } from '../../utils/constants';
 import OrderCard from '../../components/OrderCard/OrderCard';
@@ -81,6 +82,12 @@ export default function HomePage() {
   const handleRefresh = async () => {
     await Promise.all([refreshOrders(), refreshMenu(), refreshUser()]);
   };
+
+  const handleDataRefresh = useCallback(async () => {
+    await Promise.all([refreshOrders(), refreshMenu()]);
+  }, [refreshOrders, refreshMenu]);
+
+  useRefreshOnReload(handleDataRefresh);
 
   const todayOrders  = orders?.filter((o) => o.date === today) ?? [];
   const tomorrowOrders = orders?.filter((o) => o.date === tomorrow) ?? [];

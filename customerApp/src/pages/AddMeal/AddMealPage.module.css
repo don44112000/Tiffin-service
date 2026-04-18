@@ -1,8 +1,9 @@
-.page { display: flex; flex-direction: column; min-height: 100dvh; }
+.page { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
 
 .header {
   display: flex; align-items: center; gap: 12px;
   padding: 16px 20px;
+  min-height: 72px;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   position: sticky; top: 0; z-index: 10;
@@ -62,7 +63,7 @@
   border: 1px solid rgba(239, 68, 68, 0.2);
   padding: 12px 16px;
   border-radius: var(--radius-md);
-  animation: shake 0.4s ease;
+  animation: cutoffPulse 2s ease-in-out infinite;
 }
 
 .warningText {
@@ -71,9 +72,8 @@
   line-height: 1.4;
 }
 
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+@keyframes cutoffPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.15); }
+  50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
 }
 

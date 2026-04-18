@@ -1153,10 +1153,11 @@ async function runAllTests() {
       assertHasKeys(r[day], ["date", "lunch", "dinner"], day);
       ["lunch", "dinner"].forEach((slot) => {
         assertHasKeys(r[day][slot], [
-          "total_ordered", "total_delivered",
+          "total_demand", "total_ordered", "total_delivered",
+          "veg_demand", "non_veg_demand",
           "veg_ordered", "non_veg_ordered",
           "veg_delivered", "non_veg_delivered",
-          "skipped",
+          "skipped", "veg_skipped", "non_veg_skipped",
         ], `${day}.${slot}`);
       });
     });
@@ -1173,12 +1174,55 @@ async function runAllTests() {
       date:   FUTURE_DATE_1,
     });
     assertEqual(r.success, true, "success");
+    const lunch = r.today.lunch;
     // userId1's lunch order is non-veg qty=2, delivered qty=2
     // onboarded users have veg qty=1 orders, not delivered
-    // At a minimum today's lunch total_ordered should be > 0
-    assert(r.today.lunch.total_ordered > 0, "today.lunch.total_ordered should be > 0");
-    assert(r.today.lunch.skipped >= 0, "skipped should be a non-negative number");
-    return `today.lunch.total_ordered=${r.today.lunch.total_ordered}`;
+    // total_ordered only counts non-skipped orders (= to prepare)
+    assert(lunch.total_ordered > 0, "today.lunch.total_ordered should be > 0");
+    assert(lunch.skipped >= 0, "skipped should be a non-negative number");
+    // total_demand = total_ordered + skipped (all orders placed)
+    assertEqual(lunch.total_demand, lunch.total_ordered + lunch.skipped,
+      "total_demand should equal total_ordered + skipped");
+    // veg/nv skipped should sum to total skipped
+    assertEqual(lunch.veg_skipped + lunch.non_veg_skipped, lunch.skipped,
+      "veg_skipped + non_veg_skipped should equal skipped");
+    // veg/nv ordered should sum to total_ordered
+    assertEqual(lunch.veg_ordered + lunch.non_veg_ordered, lunch.total_ordered,
+      "veg_ordered + non_veg_ordered should equal total_ordered");
+    // veg_demand / non_veg_demand = ordered + skipped per type (full demand regardless of skip)
+    assertEqual(lunch.veg_demand, lunch.veg_ordered + lunch.veg_skipped,
+      "veg_demand should equal veg_ordered + veg_skipped");
+    assertEqual(lunch.non_veg_demand, lunch.non_veg_ordered + lunch.non_veg_skipped,
+      "non_veg_demand should equal non_veg_ordered + non_veg_skipped");
+    // veg_demand + non_veg_demand must equal total_demand
+    assertEqual(lunch.veg_demand + lunch.non_veg_demand, lunch.total_demand,
+      "veg_demand + non_veg_demand should equal total_demand");
+    return `demand=${lunch.total_demand}, to_prepare=${lunch.total_ordered}, skipped=${lunch.skipped}`;
+  });
+
+  await test("16.1.b", "Dashboard: dinner slot has skipped order with correct type breakdown", "P", async () => {
+    const r = await getJSON({
+      secret: ADMIN_SECRET,
+      action: "get_dashboard",
+      date:   FUTURE_DATE_1,
+    });
+    assertEqual(r.success, true, "success");
+    const dinner = r.today.dinner;
+    // userId1's dinner order was skipped (veg, qty=1)
+    // Other onboarded users may have dinner orders too
+    assert(dinner.total_demand >= 0, "dinner total_demand should be >= 0");
+    assertEqual(dinner.total_demand, dinner.total_ordered + dinner.skipped,
+      "dinner total_demand = total_ordered + skipped");
+    assertEqual(dinner.veg_skipped + dinner.non_veg_skipped, dinner.skipped,
+      "dinner veg_skipped + non_veg_skipped = skipped");
+    // veg_demand / non_veg_demand = total per type (ordered + skipped)
+    assertEqual(dinner.veg_demand, dinner.veg_ordered + dinner.veg_skipped,
+      "dinner veg_demand = veg_ordered + veg_skipped");
+    assertEqual(dinner.non_veg_demand, dinner.non_veg_ordered + dinner.non_veg_skipped,
+      "dinner non_veg_demand = non_veg_ordered + non_veg_skipped");
+    assertEqual(dinner.veg_demand + dinner.non_veg_demand, dinner.total_demand,
+      "dinner veg_demand + non_veg_demand = total_demand");
+    return `demand=${dinner.total_demand}, veg_demand=${dinner.veg_demand}, nv_demand=${dinner.non_veg_demand}, skipped=${dinner.skipped}`;
   });
 
   await test("16.2", "Get dashboard without date", "N", async () => {
