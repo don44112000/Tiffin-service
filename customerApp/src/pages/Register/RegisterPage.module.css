@@ -26,7 +26,7 @@
 .progress { display: flex; gap: 6px; flex: 1; justify-content: center; }
 
 .progressDot {
-  width: 32px; height: 4px;
+  width: 32px; height: 6px;
   border-radius: var(--radius-full);
   background: var(--color-border);
   transition: background var(--transition-base);

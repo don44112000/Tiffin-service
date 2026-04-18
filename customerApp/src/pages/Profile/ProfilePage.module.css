@@ -69,9 +69,10 @@
   font-size: var(--font-size-base); font-weight: var(--font-weight-semibold);
   transition: all var(--transition-fast);
 }
-.logoutBtn:hover { background: var(--color-error); color: white; }
+.logoutBtn:hover { background: rgba(239, 68, 68, 0.15); color: var(--color-error); }
 .logoutBtn:active {
-  background: #FEF2F2;
+  background: var(--color-error); color: white;
+  transform: scale(0.97);
 }
 
 .rulesSection {

@@ -9,9 +9,9 @@
 }
 
 .back {
-  position: absolute;
-  top: var(--space-xl);
-  left: var(--space-xl);
+  position: fixed;
+  top: var(--space-lg);
+  left: var(--space-lg);
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -19,6 +19,7 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   transition: color var(--transition-fast);
+  z-index: 10;
 }
 
 .back:hover {

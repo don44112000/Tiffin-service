@@ -111,6 +111,7 @@
   color: var(--color-text-primary);
   background: var(--color-surface);
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .stepInput::-webkit-outer-spin-button,

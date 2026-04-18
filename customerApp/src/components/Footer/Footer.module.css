@@ -30,6 +30,13 @@
 .heart {
   display: inline-block;
   animation: pulse 1.5s infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heart {
+    animation: none;
+  }
 }
 
 @keyframes pulse {

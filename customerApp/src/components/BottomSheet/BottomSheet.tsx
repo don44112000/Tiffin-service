@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
@@ -11,30 +11,55 @@ interface Props {
   children: ReactNode;
 }
 
+const EXIT_DURATION = 250;
+
 export default function BottomSheet({ isOpen, onClose, title, children }: Props) {
   const sheetRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [closing, setClosing] = useState(false);
 
-  // Close on backdrop click
   useEffect(() => {
-    if (!isOpen) return;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    if (isOpen) {
+      setVisible(true);
+      setClosing(false);
+      document.body.style.overflow = 'hidden';
+    } else if (visible) {
+      setClosing(true);
+      const timer = setTimeout(() => {
+        setVisible(false);
+        setClosing(false);
+        document.body.style.overflow = '';
+      }, EXIT_DURATION);
+      return () => clearTimeout(timer);
+    }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  // Clean up overflow on unmount
+  useEffect(() => {
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  const handleClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  if (!visible) return null;
 
   return createPortal(
-    <div className={styles.overlay} onClick={onClose}>
+    <div
+      className={`${styles.overlay} ${closing ? styles.overlayClosing : ''}`}
+      onClick={handleClose}
+    >
       <div
         ref={sheetRef}
-        className={styles.sheet}
+        className={`${styles.sheet} ${closing ? styles.sheetClosing : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={styles.handle} />
         {title && (
           <div className={styles.header}>
             <h2 className={styles.title}>{title}</h2>
-            <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+            <button className={styles.closeBtn} onClick={handleClose} aria-label="Close">
               <X size={20} />
             </button>
           </div>
