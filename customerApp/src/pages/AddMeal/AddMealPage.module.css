@@ -1,8 +1,9 @@
-.page { display: flex; flex-direction: column; min-height: 100dvh; }
+.page { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
 
 .header {
   display: flex; align-items: center; gap: 12px;
   padding: 16px 20px;
+  min-height: 72px;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   position: sticky; top: 0; z-index: 10;

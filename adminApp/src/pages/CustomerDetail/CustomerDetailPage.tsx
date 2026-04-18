@@ -16,6 +16,7 @@ import {
   Package,
 } from 'lucide-react';
 import { useCache } from '../../hooks/useCache';
+import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
 import { useToast } from '../../context/ToastContext';
 import {
   getAllUsers,
@@ -189,10 +190,12 @@ export function CustomerDetailPage() {
     }
   };
 
-  const handleRefreshAll = async () => {
+  const handleRefreshAll = useCallback(async () => {
     await refreshUsers();
     await refreshHistory();
-  };
+  }, [refreshUsers, refreshHistory]);
+
+  useRefreshOnReload(handleRefreshAll);
 
   if (usersLoading || !customer) return <CustomerDetailSkeleton />;
 

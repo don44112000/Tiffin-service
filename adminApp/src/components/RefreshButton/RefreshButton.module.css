@@ -24,14 +24,14 @@
 
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .spinning {
   color: var(--color-primary);
   border-color: var(--color-primary-20);
   background: var(--color-primary-10);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .spinning svg {

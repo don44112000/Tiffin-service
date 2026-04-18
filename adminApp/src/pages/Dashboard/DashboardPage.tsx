@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
   ChevronRight,
-  RefreshCw,
   Sun,
   Moon,
 } from 'lucide-react';
 import { useCache } from '../../hooks/useCache';
+import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
 import { PullToRefresh } from '../../components/PullToRefresh/PullToRefresh';
+import { RefreshButton } from '../../components/RefreshButton/RefreshButton';
 import { DatePickerInput } from '../../components/DatePickerInput/DatePickerInput';
 import { getDashboard, getNegativeCredits } from '../../services/api';
 import { DashboardSkeleton } from '../../components/Skeleton/Skeleton';
@@ -180,10 +181,10 @@ export function DashboardPage() {
   const dashFetcher = useCallback((isR: boolean) => getDashboard(selectedDate, !isR), [selectedDate]);
   const debtFetcher = useCallback((isR: boolean) => getNegativeCredits(!isR), []);
 
-  const { data: dash, isLoading: dashLoading, refresh: refreshDash } = useCache<DashboardResponse>(
+  const { data: dash, isLoading: dashLoading, isRefreshing: dashRefreshing, refresh: refreshDash } = useCache<DashboardResponse>(
     CACHE_KEYS.DASHBOARD(selectedDate), dashFetcher, CACHE_TTL
   );
-  const { data: debt, refresh: refreshDebt } = useCache<NegativeCreditsResponse>(
+  const { data: debt, isRefreshing: debtRefreshing, refresh: refreshDebt } = useCache<NegativeCreditsResponse>(
     CACHE_KEYS.NEGATIVE, debtFetcher, CACHE_TTL
   );
 
@@ -192,9 +193,11 @@ export function DashboardPage() {
   const dinnerData = useMemo(() => focusDay ? buildSummaryFromSlot(focusDay.dinner) : null, [focusDay]);
   const dayData = useMemo(() => lunchData && dinnerData ? combineSummaries(lunchData, dinnerData) : null, [lunchData, dinnerData]);
 
-  const refreshAll = async () => {
+  const refreshAll = useCallback(async () => {
     await Promise.all([refreshDash(), refreshDebt()]);
-  };
+  }, [refreshDash, refreshDebt]);
+
+  useRefreshOnReload(refreshAll);
 
   if (dashLoading) return <DashboardSkeleton />;
 
@@ -209,9 +212,7 @@ export function DashboardPage() {
             <DatePickerInput value={selectedDate} onChange={setSelectedDate} />
           </div>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={refreshAll}>
-          <RefreshCw size={16} />
-        </button>
+        <RefreshButton onRefresh={refreshAll} isRefreshing={dashRefreshing || debtRefreshing} />
       </div>
 
       {/* ── Day Card (overview + slot breakdown in one card) ────────── */}

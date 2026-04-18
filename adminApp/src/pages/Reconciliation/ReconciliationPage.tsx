@@ -18,18 +18,19 @@ function persistReconciledDate(date: string) {
   localStorage.setItem(RECONCILED_KEY, JSON.stringify([...dates]));
 }
 import {
-  RefreshCw,
   Sun,
   Moon,
   CheckCircle,
   AlertTriangle,
 } from 'lucide-react';
 import { useCache } from '../../hooks/useCache';
+import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
 import { useToast } from '../../context/ToastContext';
 import { getDashboard, markDayComplete } from '../../services/api';
 import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
 import { DatePickerInput } from '../../components/DatePickerInput/DatePickerInput';
 import { PullToRefresh } from '../../components/PullToRefresh/PullToRefresh';
+import { RefreshButton } from '../../components/RefreshButton/RefreshButton';
 import { ReconciliationSkeleton } from '../../components/Skeleton/Skeleton';
 import { invalidateCache } from '../../utils/cache';
 import { CACHE_KEYS, CACHE_TTL } from '../../utils/constants';
@@ -54,7 +55,9 @@ export function ReconciliationPage() {
 
   const cacheKey = CACHE_KEYS.DASHBOARD(date);
   const fetcher = useCallback((isR: boolean) => getDashboard(date, !isR), [date]);
-  const { data, isLoading, refresh } = useCache<DashboardResponse>(cacheKey, fetcher, CACHE_TTL);
+  const { data, isLoading, isRefreshing, refresh } = useCache<DashboardResponse>(cacheKey, fetcher, CACHE_TTL);
+
+  useRefreshOnReload(refresh);
 
   // Find the day summary matching selected date
   const daySummary: DaySummary | null = useMemo(() => {
@@ -112,9 +115,7 @@ export function ReconciliationPage() {
     <div className="page-content fade-in">
       <div className="page-header">
         <h1 className="page-title">Reconciliation</h1>
-        <button className="btn btn-ghost btn-sm" onClick={refresh}>
-          <RefreshCw size={16} />
-        </button>
+        <RefreshButton onRefresh={refresh} isRefreshing={isRefreshing} />
       </div>
 
       {/* Date picker */}

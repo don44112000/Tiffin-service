@@ -3,9 +3,11 @@ import { ChevronLeft, ChevronRight, TrendingUp, Package, SkipForward, Coins } fr
 import { useAuth } from '../../context/AuthContext';
 import { getMonthlyReport } from '../../services/api';
 import { useCache } from '../../hooks/useCache';
+import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
 import { monthStartStr, monthEndStr, getMonthLabel, formatShortDate } from '../../utils/dates';
 import { CACHE_KEYS } from '../../utils/constants';
 import RefreshButton from '../../components/RefreshButton/RefreshButton';
+import PullToRefresh from '../../components/PullToRefresh/PullToRefresh';
 import BottomSheet from '../../components/BottomSheet/BottomSheet';
 import { ReportSkeleton } from '../../components/Skeleton/Skeleton';
 import type { MonthlyReport, MonthlyReportOrder } from '../../types';
@@ -38,6 +40,8 @@ export default function ReportPage() {
 
   const { data: report, isLoading, isRefreshing, refresh } = useCache<MonthlyReport>(cacheKey, fetchReport);
 
+  useRefreshOnReload(refresh);
+
   const goBack = () => { if (month === 1) { setYear(y => y - 1); setMonth(12); } else setMonth(m => m - 1); };
   const goForward = () => { if (month === 12) { setYear(y => y + 1); setMonth(1); } else setMonth(m => m + 1); };
 
@@ -59,7 +63,8 @@ export default function ReportPage() {
         <RefreshButton onRefresh={refresh} isRefreshing={isRefreshing} />
       </div>
 
-      <div className="page-content">
+      <PullToRefresh onRefresh={refresh}>
+        <div className="page-content">
         {/* Month selector */}
         <div className={styles.monthNav}>
           <button className={styles.navBtn} onClick={goBack}><ChevronLeft size={18} /></button>
@@ -108,6 +113,7 @@ export default function ReportPage() {
         )}
         <Footer />
       </div>
+      </PullToRefresh>
 
       <BottomSheet isOpen={!!selectedOrder} onClose={() => setSelectedOrder(null)} title="Order Details">
         {selectedOrder && (

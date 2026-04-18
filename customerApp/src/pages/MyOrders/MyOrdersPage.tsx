@@ -3,11 +3,13 @@ import { format } from 'date-fns';
 import { useAuth } from '../../context/AuthContext';
 import { getOrdersByUser, getMenu } from '../../services/api';
 import { useCache } from '../../hooks/useCache';
+import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
 import { monthStartStr, monthEndStr, getDayLabel, getDayOfWeek } from '../../utils/dates';
 import { CACHE_KEYS } from '../../utils/constants';
 import Calendar from '../../components/Calendar/Calendar';
 import OrderCard from '../../components/OrderCard/OrderCard';
 import RefreshButton from '../../components/RefreshButton/RefreshButton';
+import PullToRefresh from '../../components/PullToRefresh/PullToRefresh';
 import { CalendarSkeleton } from '../../components/Skeleton/Skeleton';
 import type { Order, MenuItem } from '../../types';
 import Footer from '../../components/Footer/Footer';
@@ -35,9 +37,11 @@ export default function MyOrdersPage() {
   const { data: orders, isLoading: ordersLoading, isRefreshing: ordersRefreshing, refresh: refreshOrders } = useCache<Order[]>(cacheKey, fetchOrders);
   const { data: menu, isLoading: menuLoading, isRefreshing: menuRefreshing, refresh: refreshMenu } = useCache<MenuItem[]>('weekly_menu', fetchMenu, 24 * 60 * 60 * 1000);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     await Promise.all([refreshOrders(), refreshMenu()]);
-  };
+  }, [refreshOrders, refreshMenu]);
+
+  useRefreshOnReload(refresh);
 
   const isLoading = ordersLoading || menuLoading;
   const isRefreshing = ordersRefreshing || menuRefreshing;
@@ -64,7 +68,8 @@ export default function MyOrdersPage() {
         <RefreshButton onRefresh={refresh} isRefreshing={isRefreshing} />
       </div>
 
-      <div className="page-content">
+      <PullToRefresh onRefresh={refresh}>
+        <div className="page-content">
         <div className={styles.calendarWrap}>
           <Calendar
             year={year} month={month}
@@ -108,6 +113,7 @@ export default function MyOrdersPage() {
         </div>
         <Footer />
       </div>
+      </PullToRefresh>
     </div>
   );
 }

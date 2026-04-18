@@ -1,10 +1,12 @@
 import { useState, useCallback, useMemo } from 'react';
-import { RefreshCw, Plus, Pencil } from 'lucide-react';
+import { Plus, Pencil } from 'lucide-react';
 import { useCache } from '../../hooks/useCache';
+import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
 import { useToast } from '../../context/ToastContext';
 import { getMenu, upsertMenu } from '../../services/api';
 import { BottomSheet } from '../../components/BottomSheet/BottomSheet';
 import { PullToRefresh } from '../../components/PullToRefresh/PullToRefresh';
+import { RefreshButton } from '../../components/RefreshButton/RefreshButton';
 import { MenuSkeleton } from '../../components/Skeleton/Skeleton';
 import { invalidateCache } from '../../utils/cache';
 import { CACHE_KEYS, CACHE_TTL_LONG, DAYS, SLOTS } from '../../utils/constants';
@@ -22,11 +24,13 @@ export function MenuPage() {
   const [saving, setSaving] = useState(false);
 
   const fetcher = useCallback((isR: boolean) => getMenu(undefined, undefined, !isR), []);
-  const { data, isLoading, refresh } = useCache<MenuResponse>(
+  const { data, isLoading, isRefreshing, refresh } = useCache<MenuResponse>(
     CACHE_KEYS.MENU,
     fetcher,
     CACHE_TTL_LONG
   );
+
+  useRefreshOnReload(refresh);
 
   // Organize menu into day -> slot -> MenuItem map
   const menuMap = useMemo(() => {
@@ -74,9 +78,7 @@ export function MenuPage() {
     <div className="page-content fade-in">
       <div className="page-header">
         <h1 className="page-title">Weekly Menu</h1>
-        <button className="btn btn-ghost btn-sm" onClick={refresh}>
-          <RefreshCw size={16} />
-        </button>
+        <RefreshButton onRefresh={refresh} isRefreshing={isRefreshing} />
       </div>
 
       <div className={styles.grid}>

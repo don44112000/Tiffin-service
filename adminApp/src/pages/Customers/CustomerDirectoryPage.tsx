@@ -1,9 +1,10 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { RefreshCw } from 'lucide-react';
 import { useCache } from '../../hooks/useCache';
+import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
 import { getAllUsers } from '../../services/api';
 import { PullToRefresh } from '../../components/PullToRefresh/PullToRefresh';
+import { RefreshButton } from '../../components/RefreshButton/RefreshButton';
 import { SearchBar } from '../../components/SearchBar/SearchBar';
 import { CustomerCard } from '../../components/CustomerCard/CustomerCard';
 import { CustomerListSkeleton } from '../../components/Skeleton/Skeleton';
@@ -19,11 +20,13 @@ export function CustomerDirectoryPage() {
   const filter = searchParams.get('filter') || 'all';
 
   const fetcher = useCallback((isR: boolean) => getAllUsers(!isR), []);
-  const { data, isLoading, error, refresh } = useCache<AllUsersResponse>(
+  const { data, isLoading, isRefreshing, error, refresh } = useCache<AllUsersResponse>(
     CACHE_KEYS.USERS,
     fetcher,
     CACHE_TTL
   );
+
+  useRefreshOnReload(refresh);
 
   const customers = useMemo(() => {
     if (!data?.users) return [];
@@ -57,9 +60,7 @@ export function CustomerDirectoryPage() {
         <div>
           <h1 className="page-title">Customers ({data?.total ?? 0})</h1>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={refresh}>
-          <RefreshCw size={16} />
-        </button>
+        <RefreshButton onRefresh={refresh} isRefreshing={isRefreshing} />
       </div>
 
       <div className="tabs" style={{ marginBottom: 'var(--space-lg)' }}>

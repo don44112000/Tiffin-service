@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Shield, Sun, Moon, Package, CheckCircle, Clock, Minus } from 'lucide-react';
 import { useCache } from '../../hooks/useCache';
+import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
 import { useToast } from '../../context/ToastContext';
 import { getOrdersByDateSlot, markDelivered } from '../../services/api';
 import { PullToRefresh } from '../../components/PullToRefresh/PullToRefresh';
@@ -47,6 +48,8 @@ export function DeliveryPage() {
     fetcher,
     CACHE_TTL_SHORT
   );
+
+  useRefreshOnReload(refresh);
 
   // Clear local delivered state when date/slot changes
   useEffect(() => {
