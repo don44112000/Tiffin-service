@@ -1,11 +1,12 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { Shield, Sun, Moon, Package, CheckCircle, Clock, Minus } from 'lucide-react';
+import { Shield, Sun, Moon, Package, CheckCircle, Clock, Minus, ArrowLeft } from 'lucide-react';
 import { useCache } from '../../hooks/useCache';
 import { useRefreshOnReload } from '../../hooks/useRefreshOnReload';
 import { useToast } from '../../context/ToastContext';
 import { getOrdersByDateSlot, markDelivered } from '../../services/api';
 import { PullToRefresh } from '../../components/PullToRefresh/PullToRefresh';
+import { RefreshButton } from '../../components/RefreshButton/RefreshButton';
 import { SearchBar } from '../../components/SearchBar/SearchBar';
 import { DatePickerInput } from '../../components/DatePickerInput/DatePickerInput';
 import { OrderDeliveryCard } from '../../components/OrderDeliveryCard/OrderDeliveryCard';
@@ -140,54 +141,76 @@ export function DeliveryPage() {
   if (isLoading) return <DeliveryPageSkeleton />;
 
   return (
-    <PullToRefresh onRefresh={refresh}>
-      <div className={styles.page}>
-        {/* Top bar — only shown on the public delivery page, not inside admin panel */}
-        {!isAdminView && (
-          <header className={styles.topbar}>
-            <h1 className={styles.title}>Tiffin Delivery</h1>
-            <button className={styles.adminLink} onClick={() => navigate(ROUTES.ADMIN_LOGIN)}>
-              <Shield size={18} />
-              <span>Admin</span>
+    <div className={isAdminView ? 'page-content fade-in' : styles.page}>
+      {/* Admin view: standard page header with RefreshButton */}
+      {isAdminView && (
+        <div className="page-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+            <button className="btn btn-ghost btn-sm" onClick={() => navigate(-1)}>
+              <ArrowLeft size={18} />
             </button>
-          </header>
-        )}
+            <h1 className="page-title">Delivery</h1>
+          </div>
+          <RefreshButton onRefresh={refresh} isRefreshing={isRefreshing} />
+        </div>
+      )}
 
-        {/* Date selector */}
-        <div className={styles.dateSection}>
-          <DatePickerInput value={date} onChange={setDate} />
-          <div className={styles.quickDates}>
-            <button
-              className={`${styles.quickDate} ${date === today ? styles.quickDateActive : ''}`}
-              onClick={() => setDate(today)}
-            >
-              Today
-            </button>
-            <button
-              className={`${styles.quickDate} ${date === tomorrow ? styles.quickDateActive : ''}`}
-              onClick={() => setDate(tomorrow)}
-            >
-              Tomorrow
+      {/* Public view: standalone topbar */}
+      {!isAdminView && (
+        <header className={styles.topbar}>
+          <h1 className={styles.title}>Tiffin Delivery</h1>
+          <div className={styles.topbarRight}>
+            <RefreshButton onRefresh={refresh} isRefreshing={isRefreshing} />
+            <button className={styles.adminLink} onClick={() => navigate(ROUTES.ADMIN_LOGIN)}>
+              <Shield size={16} />
+              <span>Admin Login</span>
             </button>
           </div>
-        </div>
+        </header>
+      )}
 
-        {/* Slot toggle */}
-        <div className={styles.slotToggle}>
+      <PullToRefresh onRefresh={refresh}>
+
+      {/* Date controls */}
+      <div className={styles.dateSection}>
+        <DatePickerInput value={date} onChange={setDate} />
+        <div className={styles.quickDates}>
           <button
-            className={`${styles.slotBtn} ${slot === 'lunch' ? styles.slotActive : ''}`}
-            onClick={() => setSlot('lunch')}
+            className={`${styles.quickDate} ${date === today ? styles.quickDateActive : ''}`}
+            onClick={() => setDate(today)}
           >
-            <Sun size={16} />
-            Lunch
+            Today
           </button>
           <button
-            className={`${styles.slotBtn} ${slot === 'dinner' ? styles.slotActive : ''}`}
-            onClick={() => setSlot('dinner')}
+            className={`${styles.quickDate} ${date === tomorrow ? styles.quickDateActive : ''}`}
+            onClick={() => setDate(tomorrow)}
           >
-            <Moon size={16} />
-            Dinner
+            Tomorrow
           </button>
+        </div>
+      </div>
+
+      {/* Slot toggle */}
+      <div className={styles.slotToggle}>
+        <button
+          className={`${styles.slotBtn} ${slot === 'lunch' ? styles.slotActive : ''}`}
+          onClick={() => setSlot('lunch')}
+        >
+          <Sun size={16} />
+          Lunch
+        </button>
+        <button
+          className={`${styles.slotBtn} ${slot === 'dinner' ? styles.slotActive : ''}`}
+          onClick={() => setSlot('dinner')}
+        >
+          <Moon size={16} />
+          Dinner
+        </button>
+      </div>
+
+        {/* Hint */}
+        <div className={styles.infoNote}>
+          💡 Adjust quantity and mark deliveries directly from each card
         </div>
 
         {/* Summary strip */}
@@ -238,7 +261,7 @@ export function DeliveryPage() {
         {/* Error banner */}
         {error && <div className={`error-banner ${styles.errorWrap}`}>{error}</div>}
 
-        {isRefreshing && <div className={styles.refreshing}>Refreshing...</div>}
+
 
         {/* Grouped order list */}
         <div className={styles.list}>
@@ -289,7 +312,7 @@ export function DeliveryPage() {
             })
           )}
         </div>
-      </div>
-    </PullToRefresh>
+      </PullToRefresh>
+    </div>
   );
 }

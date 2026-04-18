@@ -111,6 +111,11 @@ export function CustomerDetailPage() {
   const { data: report, isLoading: reportLoading, refresh: refreshReport } =
     useCache<MonthlyReportResponse>(reportKey, reportFetcher, CACHE_TTL);
 
+  const creditsTotal = useMemo(() => {
+    if (!report?.orders) return 0;
+    return report.orders.reduce((sum, o) => sum + (o.credits_deducted || 0), 0);
+  }, [report]);
+
   const prevMonth = () => {
     if (reportMonth === 1) { setReportMonth(12); setReportYear((y) => y - 1); }
     else setReportMonth((m) => m - 1);
@@ -208,9 +213,8 @@ export function CustomerDetailPage() {
     .slice(0, 2);
 
   return (
-    <PullToRefresh onRefresh={handleRefreshAll}>
     <div className="page-content fade-in">
-      {/* Back button */}
+      {/* Back button — outside PullToRefresh */}
       <button
         className="btn btn-ghost btn-sm"
         style={{ marginBottom: 'var(--space-lg)' }}
@@ -219,6 +223,8 @@ export function CustomerDetailPage() {
         <ArrowLeft size={18} />
         Back to Customers
       </button>
+
+      <PullToRefresh onRefresh={handleRefreshAll}>
 
       {/* Profile card */}
       <div className={`card ${styles.profileCard}`}>
@@ -345,7 +351,7 @@ export function CustomerDetailPage() {
                   <div className={styles.reportStatLabel}>Skipped</div>
                 </div>
                 <div className={`${styles.reportStat} ${styles.statCredits}`}>
-                  <div className={styles.reportStatValue}>{report.summary.total_credits_deducted}</div>
+                  <div className={styles.reportStatValue}>{creditsTotal}</div>
                   <div className={styles.reportStatLabel}>Credits</div>
                 </div>
               </div>
@@ -540,7 +546,7 @@ export function CustomerDetailPage() {
           </div>
         )}
       </BottomSheet>
+      </PullToRefresh>
     </div>
-    </PullToRefresh>
   );
 }

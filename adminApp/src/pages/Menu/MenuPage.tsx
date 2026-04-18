@@ -74,12 +74,13 @@ export function MenuPage() {
   if (isLoading) return <MenuSkeleton />;
 
   return (
-    <PullToRefresh onRefresh={refresh}>
     <div className="page-content fade-in">
       <div className="page-header">
         <h1 className="page-title">Weekly Menu</h1>
         <RefreshButton onRefresh={refresh} isRefreshing={isRefreshing} />
       </div>
+
+      <PullToRefresh onRefresh={refresh}>
 
       <div className={styles.grid}>
         {DAYS.map((day) => (
@@ -162,7 +163,7 @@ export function MenuPage() {
           </button>
         </div>
       </BottomSheet>
+      </PullToRefresh>
     </div>
-    </PullToRefresh>
   );
 }

@@ -1,5 +1,4 @@
-import React, { useState, useRef } from 'react';
-import { RefreshCw, ArrowDown } from 'lucide-react';
+import React, { useRef, useCallback } from 'react';
 import styles from './PullToRefresh.module.css';
 
 interface PullToRefreshProps {
@@ -8,67 +7,64 @@ interface PullToRefreshProps {
   disabled?: boolean;
 }
 
-const PULL_THRESHOLD = 80;
-const MAX_PULL = 120;
+const PULL_THRESHOLD = 60;
 
 export function PullToRefresh({ onRefresh, children, disabled = false }: PullToRefreshProps) {
-  const [pullDistance, setPullDistance] = useState(0);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isPulling, setIsPulling] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
+  const pulling = useRef(false);
+  const refreshing = useRef(false);
 
-  const getScrollTop = (): number => {
-    const el = containerRef.current;
-    if (!el) return 0;
-    for (const child of Array.from(el.children)) {
-      const c = child as HTMLElement;
-      if (c.scrollHeight > c.clientHeight) return c.scrollTop;
+  /** Find scroll position of the nearest scrollable ancestor or window */
+  const getScrollTop = useCallback((): number => {
+    let el = containerRef.current?.parentElement;
+    while (el) {
+      // Quick check without getComputedStyle for performance
+      if (el.scrollTop > 0) return el.scrollTop;
+      if (el.scrollHeight > el.clientHeight + 1) {
+        const ov = el.style.overflowY;
+        if (ov === 'auto' || ov === 'scroll') return el.scrollTop;
+        // Only use getComputedStyle as fallback
+        const computed = getComputedStyle(el).overflowY;
+        if (computed === 'auto' || computed === 'scroll') return el.scrollTop;
+      }
+      el = el.parentElement;
     }
-    return el.scrollTop;
-  };
+    return window.scrollY || 0;
+  }, []);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (disabled || isRefreshing || getScrollTop() > 5) return;
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (disabled || refreshing.current) return;
+    if (getScrollTop() > 2) return;
     startY.current = e.touches[0].pageY;
-    setIsPulling(true);
-  };
+    pulling.current = true;
+  }, [disabled, getScrollTop]);
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isPulling || isRefreshing) return;
-
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!pulling.current || refreshing.current) return;
     const diff = e.touches[0].pageY - startY.current;
 
-    if (diff > 0 && getScrollTop() === 0) {
+    if (diff > 0 && getScrollTop() <= 2) {
       if (e.cancelable) e.preventDefault();
-      setPullDistance(Math.min(MAX_PULL, diff * 0.4));
     } else {
-      setIsPulling(false);
-      setPullDistance(0);
+      pulling.current = false;
     }
-  };
+  }, [getScrollTop]);
 
-  const handleTouchEnd = async () => {
-    if (!isPulling || isRefreshing) return;
-    setIsPulling(false);
+  const handleTouchEnd = useCallback(async (e: React.TouchEvent) => {
+    if (!pulling.current || refreshing.current) return;
+    pulling.current = false;
 
-    if (pullDistance >= PULL_THRESHOLD) {
-      setIsRefreshing(true);
-      setPullDistance(PULL_THRESHOLD);
+    const diff = e.changedTouches[0].pageY - startY.current;
+    if (diff >= PULL_THRESHOLD) {
+      refreshing.current = true;
       try {
         await onRefresh();
       } finally {
-        setIsRefreshing(false);
-        setPullDistance(0);
+        refreshing.current = false;
       }
-    } else {
-      setPullDistance(0);
     }
-  };
-
-  const isTriggered = pullDistance >= PULL_THRESHOLD;
-  const indicatorOpacity = Math.min(1, pullDistance / PULL_THRESHOLD);
-  const arrowRotation = isTriggered ? 180 : Math.round((pullDistance / PULL_THRESHOLD) * 180);
+  }, [onRefresh]);
 
   return (
     <div
@@ -78,34 +74,7 @@ export function PullToRefresh({ onRefresh, children, disabled = false }: PullToR
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Pull indicator */}
-      <div
-        className={styles.indicator}
-        style={{ opacity: indicatorOpacity, height: pullDistance > 0 || isRefreshing ? 48 : 0 }}
-      >
-        <div className={`${styles.iconWrap}${isRefreshing ? ` ${styles.active}` : ''}`}>
-          {isRefreshing ? (
-            <RefreshCw size={18} className={styles.spinning} />
-          ) : (
-            <ArrowDown
-              size={18}
-              style={{ transform: `rotate(${arrowRotation}deg)`, transition: isTriggered ? 'transform 0.2s' : 'none' }}
-            />
-          )}
-        </div>
-        <span className={styles.label}>
-          {isRefreshing ? 'Refreshing\u2026' : isTriggered ? 'Release to refresh' : 'Pull to refresh'}
-        </span>
-      </div>
-
-      {/* Scrollable content */}
-      <div
-        className={styles.content}
-        style={{
-          transform: `translateY(${pullDistance}px)`,
-          transition: isPulling ? 'none' : 'transform 0.3s ease',
-        }}
-      >
+      <div className={styles.content}>
         {children}
       </div>
     </div>

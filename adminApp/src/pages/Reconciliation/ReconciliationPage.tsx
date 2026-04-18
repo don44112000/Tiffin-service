@@ -33,7 +33,7 @@ import { PullToRefresh } from '../../components/PullToRefresh/PullToRefresh';
 import { RefreshButton } from '../../components/RefreshButton/RefreshButton';
 import { ReconciliationSkeleton } from '../../components/Skeleton/Skeleton';
 import { invalidateCache } from '../../utils/cache';
-import { CACHE_KEYS, CACHE_TTL } from '../../utils/constants';
+import { CACHE_KEYS } from '../../utils/constants';
 import { getToday, formatFullDate } from '../../utils/dates';
 import type { DashboardResponse, DaySummary } from '../../types';
 import styles from './ReconciliationPage.module.css';
@@ -55,7 +55,7 @@ export function ReconciliationPage() {
 
   const cacheKey = CACHE_KEYS.DASHBOARD(date);
   const fetcher = useCallback((isR: boolean) => getDashboard(date, !isR), [date]);
-  const { data, isLoading, isRefreshing, refresh } = useCache<DashboardResponse>(cacheKey, fetcher, CACHE_TTL);
+  const { data, isLoading, isRefreshing, refresh } = useCache<DashboardResponse>(cacheKey, fetcher, Infinity);
 
   useRefreshOnReload(refresh);
 
@@ -111,12 +111,13 @@ export function ReconciliationPage() {
   if (isLoading) return <ReconciliationSkeleton />;
 
   return (
-    <PullToRefresh onRefresh={refresh}>
     <div className="page-content fade-in">
       <div className="page-header">
         <h1 className="page-title">Reconciliation</h1>
         <RefreshButton onRefresh={refresh} isRefreshing={isRefreshing} />
       </div>
+
+      <PullToRefresh onRefresh={refresh}>
 
       {/* Date picker */}
       <div className={styles.dateNav}>
@@ -265,7 +266,7 @@ export function ReconciliationPage() {
         onConfirm={handleReconcile}
         onCancel={() => setConfirmOpen(false)}
       />
+      </PullToRefresh>
     </div>
-    </PullToRefresh>
   );
 }

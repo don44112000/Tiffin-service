@@ -55,6 +55,7 @@ export default function ReportPage() {
   );
 
   const { summary, orders } = report ?? { summary: null, orders: [] };
+  const creditsTotal = orders.reduce((sum, o) => sum + (o.credits_deducted || 0), 0);
 
   return (
     <div className={styles.page}>
@@ -77,7 +78,7 @@ export default function ReportPage() {
           <StatCard icon={<Package size={20} />} label="Ordered" value={summary?.total_ordered ?? 0} color="var(--color-primary)" />
           <StatCard icon={<TrendingUp size={20} />} label="Delivered" value={summary?.total_delivered ?? 0} color="var(--color-success)" />
           <StatCard icon={<SkipForward size={20} />} label="Skipped" value={summary?.total_skipped ?? 0} color="var(--color-text-secondary)" />
-          <StatCard icon={<Coins size={20} />} label="Credits Used" value={summary?.total_credits_deducted ?? 0} color="#CA8A04" />
+          <StatCard icon={<Coins size={20} />} label="Credits Used" value={creditsTotal} color="#CA8A04" />
         </div>
 
         {/* Order table */}

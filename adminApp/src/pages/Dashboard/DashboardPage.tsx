@@ -202,9 +202,8 @@ export function DashboardPage() {
   if (dashLoading) return <DashboardSkeleton />;
 
   return (
-    <PullToRefresh onRefresh={refreshAll}>
     <div className="page-content fade-in">
-      {/* Header */}
+      {/* Header — outside PullToRefresh so it stays fixed */}
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard</h1>
@@ -214,6 +213,8 @@ export function DashboardPage() {
         </div>
         <RefreshButton onRefresh={refreshAll} isRefreshing={dashRefreshing || debtRefreshing} />
       </div>
+
+      <PullToRefresh onRefresh={refreshAll}>
 
       {/* ── Day Card (overview + slot breakdown in one card) ────────── */}
       {dayData && lunchData && dinnerData && (
@@ -288,8 +289,7 @@ export function DashboardPage() {
           </div>
         </div>
       )}
-
+      </PullToRefresh>
     </div>
-    </PullToRefresh>
   );
 }

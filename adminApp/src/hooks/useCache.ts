@@ -43,7 +43,7 @@ export function useCache<T>(
     const freshCached = readCache<T>(key);
     const stale = !freshCached || isCacheStale(key, ttlMs);
 
-    // Always show cached data immediately (even if stale)
+    // Always show cached data immediately
     setData(freshCached);
     setIsLoading(!freshCached);
 

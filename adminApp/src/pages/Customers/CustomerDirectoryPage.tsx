@@ -54,7 +54,6 @@ export function CustomerDirectoryPage() {
   if (isLoading) return <CustomerListSkeleton />;
 
   return (
-    <PullToRefresh onRefresh={refresh}>
     <div className="page-content fade-in">
       <div className="page-header">
         <div>
@@ -86,26 +85,27 @@ export function CustomerDirectoryPage() {
         />
       </div>
 
-      {error && <div className="error-banner">{error}</div>}
+      <PullToRefresh onRefresh={refresh}>
+        {error && <div className="error-banner">{error}</div>}
 
-      <div className={styles.list}>
-        {customers.length === 0 ? (
-          <div className="empty-state">
-            <p className="empty-state-title">
-              {search ? 'No matching customers' : 'No customers found'}
-            </p>
-          </div>
-        ) : (
-          customers.map((c) => (
-            <CustomerCard
-              key={c.user_id}
-              customer={c}
-              onClick={() => navigate(`/admin/customers/${c.user_id}`)}
-            />
-          ))
-        )}
-      </div>
+        <div className={styles.list}>
+          {customers.length === 0 ? (
+            <div className="empty-state">
+              <p className="empty-state-title">
+                {search ? 'No matching customers' : 'No customers found'}
+              </p>
+            </div>
+          ) : (
+            customers.map((c) => (
+              <CustomerCard
+                key={c.user_id}
+                customer={c}
+                onClick={() => navigate(`/admin/customers/${c.user_id}`)}
+              />
+            ))
+          )}
+        </div>
+      </PullToRefresh>
     </div>
-    </PullToRefresh>
   );
 }
