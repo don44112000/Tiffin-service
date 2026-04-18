@@ -109,10 +109,11 @@ export default function LoginPage() {
               Create account
             </Link>
           </p>
+
+          <div className={styles.footerInCard}>
+            <Footer />
+          </div>
         </form>
-      </div>
-      <div className={styles.footerWrap}>
-        <Footer />
       </div>
     </div>
   );
