@@ -1,0 +1,32 @@
+.indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.sm {
+  width: 14px;
+  height: 14px;
+}
+
+.md {
+  width: 18px;
+  height: 18px;
+}
+
+.dot {
+  border-radius: 50%;
+}
+
+.sm .dot {
+  width: 7px;
+  height: 7px;
+}
+
+.md .dot {
+  width: 9px;
+  height: 9px;
+}
