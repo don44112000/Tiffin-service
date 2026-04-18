@@ -8,6 +8,7 @@ import styles from './AdminLoginPage.module.css';
 export function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { isAdmin, login } = useAuth();
   const navigate = useNavigate();
 
@@ -16,14 +17,16 @@ export function AdminLoginPage() {
     return <Navigate to={ROUTES.DASHBOARD} replace />;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!password.trim()) {
       setError('Please enter the admin password');
       return;
     }
-    const success = login(password);
+    setLoading(true);
+    const success = await login(password);
+    setLoading(false);
     if (success) {
       navigate(ROUTES.DASHBOARD, { replace: true });
     } else {
@@ -59,8 +62,8 @@ export function AdminLoginPage() {
             />
           </div>
           {error && <p className={styles.error}>{error}</p>}
-          <button type="submit" className="btn btn-primary btn-full">
-            Enter Admin Portal
+          <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+            {loading ? 'Verifying...' : 'Enter Admin Portal'}
           </button>
         </form>
       </div>

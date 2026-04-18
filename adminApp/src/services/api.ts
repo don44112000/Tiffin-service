@@ -16,7 +16,6 @@ import type {
 } from '../types';
 
 const BASE_URL = '/api/proxy';
-const API_SECRET = import.meta.env.VITE_API_SECRET;
 
 async function apiGet<T>(
   action: string,
@@ -25,7 +24,6 @@ async function apiGet<T>(
 ): Promise<T> {
   return requestQueue.add(async () => {
     const query = new URLSearchParams({ action, ...params });
-    if (API_SECRET) query.append('secret', API_SECRET);
     const res = await fetch(`${BASE_URL}?${query.toString()}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
@@ -43,7 +41,7 @@ async function apiPost<T>(
     const res = await fetch(BASE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, secret: API_SECRET, ...body }),
+      body: JSON.stringify({ action, ...body }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();

@@ -1,11 +1,15 @@
 [build]
-  base = "adminApp"
   command = "npm run build"
   publish = "dist"
 
 [[redirects]]
   from = "/api/proxy"
   to = "/.netlify/functions/proxy"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth"
+  to = "/.netlify/functions/auth"
   status = 200
 
 [[redirects]]

@@ -4,8 +4,8 @@ import { Handler } from '@netlify/functions';
 export const handler: Handler = async (event) => {
   const { httpMethod, queryStringParameters, body } = event;
 
-  const GOOGLE_URL = process.env.VITE_API_BASE_URL;
-  const SECRET = process.env.VITE_API_SECRET;
+  const GOOGLE_URL = process.env.API_BASE_URL;
+  const SECRET = process.env.API_SECRET;
 
   if (!GOOGLE_URL || !SECRET) {
     return {

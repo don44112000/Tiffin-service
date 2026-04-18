@@ -5,7 +5,7 @@ import { clearAllCache } from '../utils/cache';
 
 interface AdminAuthContextValue {
   isAdmin: boolean;
-  login: (password: string) => boolean;
+  login: (password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -16,14 +16,23 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     () => localStorage.getItem(CACHE_KEYS.AUTH) === 'true'
   );
 
-  const login = useCallback((password: string): boolean => {
-    const correct = import.meta.env.VITE_ADMIN_PASSWORD;
-    if (password === correct) {
-      localStorage.setItem(CACHE_KEYS.AUTH, 'true');
-      setIsAdmin(true);
-      return true;
+  const login = useCallback(async (password: string): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem(CACHE_KEYS.AUTH, 'true');
+        setIsAdmin(true);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
     }
-    return false;
   }, []);
 
   const logout = useCallback(() => {
